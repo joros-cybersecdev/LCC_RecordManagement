@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LCC Teacher Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/lcc-style.css">
+    <link rel="stylesheet" href="css/student-dashboard.css">
+    <link rel="stylesheet" href="css/teacher-dashboard.css">
+</head>
+<body class="dashboard-body">
+
+<div class="dashboard-wrapper">
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="sidebar-brand-logo">LCC</div>
+            <div class="sidebar-brand-text">
+                <span class="sidebar-brand-name">LCC Portal</span>
+                <span class="sidebar-brand-sub">Teacher Portal</span>
+            </div>
+        </div>
+
+        <div class="sidebar-user">
+            <div class="sidebar-avatar teacher-av">J</div>
+            <div class="sidebar-user-info">
+                <span class="sidebar-user-name">Jane Doe</span>
+                <span class="sidebar-user-role">Teacher</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <span class="nav-section-label">Menu</span>
+            
+            <a href="#" class="sidebar-link active" data-target="dashboard-view" data-title="Teacher Dashboard" data-subtitle="Welcome, Jane!">
+                <span class="sidebar-link-icon">&#8962;</span>
+                Dashboard
+            </a>
+            <a href="#" class="sidebar-link" data-target="subjects-view" data-title="My Subjects" data-subtitle="All subjects assigned to you">
+                <span class="sidebar-link-icon">&#128218;</span>
+                My Subjects
+            </a>
+            <a href="#" class="sidebar-link" data-target="grades-view" data-title="Manage Grades" data-subtitle="Enter and update student grades">
+                <span class="sidebar-link-icon">&#128202;</span>
+                Manage Grades
+            </a>
+            <a href="#" class="sidebar-link" data-target="access-view" data-title="Grade Access Control" data-subtitle="Control which students can view their grades">
+                <span class="sidebar-link-icon">&#128275;</span>
+                Grade Access
+            </a>
+            
+            <span class="nav-section-label mt-auto">Account</span>
+            <a href="login.html" class="sidebar-link logout-link">
+                <span class="sidebar-link-icon">&#8592;</span>
+                Logout
+            </a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+
+        <header class="top-header">
+            <div class="header-left">
+                <button class="sidebar-toggle">&#9776;</button>
+                <div>
+                    <h1 class="page-title" id="page-title">Teacher Dashboard</h1>
+                    <p class="page-subtitle" id="page-subtitle">Welcome, Jane!</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="header-user-info">
+                    <span class="header-user-name">Jane Doe</span>
+                    <span class="header-user-role">Teacher</span>
+                </div>
+                <div class="header-avatar teacher-av">J</div>
+            </div>
+        </header>
+
+        <div class="dashboard-content">
+
+            <div id="dashboard-view" class="view-section">
+                <div class="info-banner teacher-banner">
+                    <div class="info-banner-left">
+                        <div class="info-avatar teacher-av-lg">J</div>
+                        <div class="info-details">
+                            <h2 class="info-name">Jane Doe</h2>
+                            <p class="info-meta">
+                                College of Computer Studies &bull; Teacher
+                            </p>
+                            <p class="info-meta mt-xs">
+                                Handling 4 subjects &bull; 120 students
+                            </p>
+                        </div>
+                    </div>
+                    <div class="info-right">
+                        <span class="teacher-badge">Faculty</span>
+                    </div>
+                </div>
+
+                <div class="cards-grid">
+                    <div class="stat-card blue">
+                        <div class="stat-card-icon">&#128218;</div>
+                        <div class="stat-card-body">
+                            <span class="stat-card-label">My Subjects</span>
+                            <span class="stat-card-value">4</span>
+                        </div>
+                    </div>
+                    <div class="stat-card indigo">
+                        <div class="stat-card-icon">&#128101;</div>
+                        <div class="stat-card-body">
+                            <span class="stat-card-label">Total Students</span>
+                            <span class="stat-card-value">120</span>
+                        </div>
+                    </div>
+                    <div class="stat-card sky">
+                        <div class="stat-card-icon">&#128202;</div>
+                        <div class="stat-card-body">
+                            <span class="stat-card-label">Grades Entered</span>
+                            <span class="stat-card-value">95</span>
+                        </div>
+                    </div>
+                    <div class="stat-card violet">
+                        <div class="stat-card-icon">&#128275;</div>
+                        <div class="stat-card-body">
+                            <span class="stat-card-label">Grades Unlocked</span>
+                            <span class="stat-card-value">80</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title">My Subjects and Sections</h3>
+                    </div>
+                    <div class="panel-body">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Subject Name</th>
+                                    <th>Units</th>
+                                    <th>Section</th>
+                                    <th>Program</th>
+                                    <th>School Year</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="subject-code">IT301</span></td>
+                                    <td>Web Development II</td>
+                                    <td>3</td>
+                                    <td>BSIT-3A</td>
+                                    <td>BSIT</td>
+                                    <td>2025-2026</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="subject-code">IT302</span></td>
+                                    <td>Database Management Systems</td>
+                                    <td>3</td>
+                                    <td>BSIT-3A</td>
+                                    <td>BSIT</td>
+                                    <td>2025-2026</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="subjects-view" class="view-section hidden">
+                <div class="subjects-cards">
+                    
+                    <div class="subject-detail-card">
+                        <div class="sdc-header">
+                            <div class="sdc-code">IT301</div>
+                            <span class="sdc-units">3 units</span>
+                        </div>
+                        <h3 class="sdc-name">Web Development II</h3>
+                        <div class="sdc-meta">
+                            <div class="sdc-meta-item">
+                                <span class="sdc-meta-label">Section</span>
+                                <span class="sdc-meta-value">BSIT-3A</span>
+                            </div>
+                            <div class="sdc-meta-item">
+                                <span class="sdc-meta-label">Program</span>
+                                <span class="sdc-meta-value">BSIT</span>
+                            </div>
+                            <div class="sdc-meta-item">
+                                <span class="sdc-meta-label">Year Level</span>
+                                <span class="sdc-meta-value">3rd Year</span>
+                            </div>
+                            <div class="sdc-meta-item">
+                                <span class="sdc-meta-label">Students</span>
+                                <span class="sdc-meta-value">30</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="subject-detail-card">
+                        <div class="sdc-header">
+                            <div class="sdc-code">IT302</div>
+                            <span class="sdc-units">3 units</span>
+                        </div>
+                        <h3 class="sdc-name">Database Management Systems</h3>
+                        <div class="sdc-meta">
+                            <div class="sdc-meta-item">
+                                <span class="sdc-meta-label">Section</span>
+                                <span class="sdc-meta-value">BSIT-3A</span>
+                            </div>
+                            <div class="sdc-meta-item">
+                                <span class="sdc-meta-label">Program</span>
+                                <span class="sdc-meta-value">BSIT</span>
+                            </div>
+                            <div class="sdc-meta-item">
+                                <span class="sdc-meta-label">Year Level</span>
+                                <span class="sdc-meta-value">3rd Year</span>
+                            </div>
+                            <div class="sdc-meta-item">
+                                <span class="sdc-meta-label">Students</span>
+                                <span class="sdc-meta-value">30</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="grades-view" class="view-section hidden">
+                <div class="filter-bar">
+                    <span class="filter-label">Select Subject:</span>
+                    <select class="filter-select">
+                        <option selected>IT301 — Web Development II (BSIT-3A)</option>
+                        <option>IT302 — Database Management Systems (BSIT-3A)</option>
+                    </select>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <h3 class="panel-title">IT301 — Web Development II</h3>
+                            <p class="panel-subtitle">
+                                BSIT-3A &bull; 2025-2026 &bull; 2nd Semester
+                            </p>
+                        </div>
+                        <span class="panel-meta-count">30 student(s)</span>
+                    </div>
+                    <div class="panel-body">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Student ID</th>
+                                    <th>Full Name</th>
+                                    <th>Payment</th>
+                                    <th>Grade (1.00 - 5.00)</th>
+                                    <th>Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td><span class="subject-code">2026-001</span></td>
+                                    <td>John Doe</td>
+                                    <td><span class="access-badge unlocked">Paid</span></td>
+                                    <td>
+                                        <input type="number" class="grade-input" value="1.50" step="0.25" min="1.00" max="5.00">
+                                    </td>
+                                    <td><span class="grade-pill grade-high">Passed</span></td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td><span class="subject-code">2026-002</span></td>
+                                    <td>Maria Clara</td>
+                                    <td><span class="access-badge locked">Unpaid</span></td>
+                                    <td>
+                                        <input type="number" class="grade-input" value="" step="0.25" min="1.00" max="5.00" placeholder="e.g. 1.50">
+                                    </td>
+                                    <td><span class="empty-grade-text">No grade yet</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="panel-footer">
+                            <button type="button" class="btn-save">Save Grades</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="access-view" class="view-section hidden">
+                <div class="notice-bar notice-bar-info">
+                    <span class="notice-icon">&#8505;</span>
+                    <span>Toggle the switch to allow or prevent a student from viewing their grade. Note: Students must also have their tuition marked as paid by the admin before they can view grades.</span>
+                </div>
+
+                <div class="filter-bar">
+                    <span class="filter-label">Select Subject:</span>
+                    <select class="filter-select">
+                        <option selected>IT301 — Web Development II (BSIT-3A)</option>
+                        <option>IT302 — Database Management Systems (BSIT-3A)</option>
+                    </select>
+
+                    <button type="button" class="btn-save" id="btn-unlock-all">Unlock All</button>
+                    <button type="button" class="btn-save btn-lock" id="btn-lock-all">Lock All</button>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <h3 class="panel-title">IT301 — Web Development II</h3>
+                            <p class="panel-subtitle">
+                                BSIT-3A &bull; 2025-2026 &bull; 2nd Semester
+                            </p>
+                        </div>
+                        <span class="panel-meta-count">30 student(s)</span>
+                    </div>
+                    <div class="panel-body">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Student ID</th>
+                                    <th>Full Name</th>
+                                    <th>Payment Status</th>
+                                    <th>Grade</th>
+                                    <th>Grade Access</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td><span class="subject-code">2026-001</span></td>
+                                    <td>John Doe</td>
+                                    <td><span class="access-badge unlocked">Paid</span></td>
+                                    <td><span class="grade-pill grade-high">1.50</span></td>
+                                    <td>
+                                        <div class="toggle-wrapper">
+                                            <label class="toggle-switch">
+                                                <input type="checkbox" class="access-toggle" checked>
+                                                <span class="toggle-slider"></span>
+                                            </label>
+                                            <span class="access-status-label status-unlocked">Unlocked</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td><span class="subject-code">2026-002</span></td>
+                                    <td>Maria Clara</td>
+                                    <td><span class="access-badge locked">Unpaid</span></td>
+                                    <td><span class="empty-grade-text">No grade yet</span></td>
+                                    <td>
+                                        <div class="toggle-wrapper">
+                                            <label class="toggle-switch">
+                                                <input type="checkbox" class="access-toggle">
+                                                <span class="toggle-slider"></span>
+                                            </label>
+                                            <span class="access-status-label status-locked">Locked</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="panel-footer">
+                            <button type="button" class="btn-save">Save Access Settings</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<script src="js/dashboard.js"></script>
+<script src="js/teacher-dashboard.js"></script>
+
+</body>
+</html>

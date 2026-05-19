@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LCC Admin Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/lcc-style.css">
+    
+    <link rel="stylesheet" href="css/student-dashboard.css"> 
+    
+    <link rel="stylesheet" href="css/admin-dashboard.css">
+</head>
+<body class="dashboard-body">
+
+<div class="dashboard-wrapper">
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="sidebar-brand-logo">LCC</div>
+            <div class="sidebar-brand-text">
+                <span class="sidebar-brand-name">LCC Portal</span>
+                <span class="sidebar-brand-sub">Admin Portal</span>
+            </div>
+        </div>
+
+        <div class="sidebar-user">
+            <div class="sidebar-avatar admin-av">A</div>
+            <div class="sidebar-user-info">
+                <span class="sidebar-user-name">System Admin</span>
+                <span class="sidebar-user-role">Administrator</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <span class="nav-section-label">Main Menu</span>
+            
+            <a href="#" class="sidebar-link active" data-target="dashboard-view" data-title="Admin Dashboard" data-subtitle="System Overview">
+                <span class="sidebar-link-icon">&#8962;</span>
+                Dashboard
+            </a>
+            <a href="#" class="sidebar-link" data-target="students-view" data-title="Manage Students" data-subtitle="Add, edit, or remove students">
+                <span class="sidebar-link-icon">&#128101;</span>
+                Students
+            </a>
+            <a href="#" class="sidebar-link" data-target="teachers-view" data-title="Manage Teachers" data-subtitle="Add, edit, or remove faculty members">
+                <span class="sidebar-link-icon">&#128188;</span>
+                Teachers
+            </a>
+            <a href="#" class="sidebar-link" data-target="sections-view" data-title="Manage Sections" data-subtitle="Configure classes and programs">
+                <span class="sidebar-link-icon">&#128193;</span>
+                Sections
+            </a>
+            
+            <span class="nav-section-label mt-auto">Account</span>
+            <a href="login.html" class="sidebar-link logout-link">
+                <span class="sidebar-link-icon">&#8592;</span>
+                Logout
+            </a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+
+        <header class="top-header">
+            <div class="header-left">
+                <button class="sidebar-toggle">&#9776;</button>
+                <div>
+                    <h1 class="page-title" id="page-title">Admin Dashboard</h1>
+                    <p class="page-subtitle" id="page-subtitle">System Overview</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="header-user-info">
+                    <span class="header-user-name">System Admin</span>
+                    <span class="header-user-role">Administrator</span>
+                </div>
+                <div class="header-avatar admin-av">A</div>
+            </div>
+        </header>
+
+        <div class="dashboard-content">
+
+            <div id="dashboard-view" class="view-section">
+                <div class="info-banner admin-banner">
+                    <div class="info-banner-left">
+                        <div class="info-avatar admin-av-lg">A</div>
+                        <div class="info-details">
+                            <h2 class="info-name">Welcome, Admin</h2>
+                            <p class="info-meta">System Administration &bull; Full Access</p>
+                        </div>
+                    </div>
+                    <div class="info-right">
+                        <span class="admin-badge">System Root</span>
+                    </div>
+                </div>
+
+                <div class="cards-grid">
+                    <div class="stat-card blue">
+                        <div class="stat-card-icon">&#128101;</div>
+                        <div class="stat-card-body">
+                            <span class="stat-card-label">Total Students</span>
+                            <span class="stat-card-value">1,250</span>
+                        </div>
+                    </div>
+                    <div class="stat-card indigo">
+                        <div class="stat-card-icon">&#128188;</div>
+                        <div class="stat-card-body">
+                            <span class="stat-card-label">Total Teachers</span>
+                            <span class="stat-card-value">45</span>
+                        </div>
+                    </div>
+                    <div class="stat-card sky">
+                        <div class="stat-card-icon">&#128193;</div>
+                        <div class="stat-card-body">
+                            <span class="stat-card-label">Total Sections</span>
+                            <span class="stat-card-value">32</span>
+                        </div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="stat-card-icon">&#128176;</div>
+                        <div class="stat-card-body">
+                            <span class="stat-card-label">Paid Students</span>
+                            <span class="stat-card-value">1,100</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bottom-grid">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3 class="panel-title">Recently Added Students</h3>
+                        </div>
+                        <div class="panel-body">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Student ID</th>
+                                        <th>Full Name</th>
+                                        <th>Program</th>
+                                        <th>Payment</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span class="subject-code">2026-0450</span></td>
+                                        <td>Liam Carter</td>
+                                        <td>BSIT</td>
+                                        <td><span class="access-badge unlocked">Paid</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="subject-code">2026-0451</span></td>
+                                        <td>Olivia Reyes</td>
+                                        <td>BSCS</td>
+                                        <td><span class="access-badge locked">Unpaid</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3 class="panel-title">Payment Overview</h3>
+                        </div>
+                        <div class="panel-body payment-overview-body">
+                            <div class="payment-header">
+                                <span>Paid (88%)</span>
+                                <span class="payment-unpaid">Unpaid (12%)</span>
+                            </div>
+                            
+                            <div class="progress-track">
+                                <div class="progress-fill"></div>
+                            </div>
+                            
+                            <div class="text-center mt-lg">
+                                <button class="btn-action btn-grades nav-trigger" data-route="students-view">Manage Payments</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="students-view" class="view-section hidden">
+                <div class="panel-toolbar filter-bar">
+                    <div class="search-bar">
+                        <input type="text" class="search-input" placeholder="Search students by name or ID...">
+                    </div>
+                    <button type="button" class="btn-add modal-trigger" data-modal-target="addStudentModal">+ Add Student</button>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title">Student Roster</h3>
+                        <span class="panel-meta">Showing all records</span>
+                    </div>
+                    <div class="panel-body">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID Number</th>
+                                    <th>Full Name</th>
+                                    <th>Program / Section</th>
+                                    <th>Status</th>
+                                    <th class="text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="subject-code">2026-001</span></td>
+                                    <td>John Doe</td>
+                                    <td>BSIT-3A</td>
+                                    <td><span class="access-badge unlocked">Paid</span></td>
+                                    <td class="text-right">
+                                        <div class="action-btns justify-end">
+                                            <button class="btn-unpaid">Mark Unpaid</button>
+                                            <button class="btn-edit modal-trigger" data-modal-target="editStudentModal">Edit</button>
+                                            <button class="btn-delete">Delete</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><span class="subject-code">2026-002</span></td>
+                                    <td>Maria Clara</td>
+                                    <td>BSIT-3A</td>
+                                    <td><span class="access-badge locked">Unpaid</span></td>
+                                    <td class="text-right">
+                                        <div class="action-btns justify-end">
+                                            <button class="btn-paid">Mark Paid</button>
+                                            <button class="btn-edit modal-trigger" data-modal-target="editStudentModal">Edit</button>
+                                            <button class="btn-delete">Delete</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="teachers-view" class="view-section hidden">
+                <div class="panel-toolbar filter-bar">
+                    <div class="search-bar">
+                        <input type="text" class="search-input" placeholder="Search faculty...">
+                    </div>
+                    <button type="button" class="btn-add modal-trigger" data-modal-target="addTeacherModal">+ Add Teacher</button>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title">Faculty Roster</h3>
+                    </div>
+                    <div class="panel-body">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Full Name</th>
+                                    <th>Email</th>
+                                    <th>Department</th>
+                                    <th class="text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="subject-code">t.janedoe</span></td>
+                                    <td>Jane Doe</td>
+                                    <td>jane.doe@lcc.edu</td>
+                                    <td>College of Computer Studies</td>
+                                    <td class="text-right">
+                                        <div class="action-btns justify-end">
+                                            <button class="btn-edit modal-trigger" data-modal-target="editTeacherModal">Edit</button>
+                                            <button class="btn-delete">Delete</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="sections-view" class="view-section hidden">
+                <div class="panel-toolbar filter-bar">
+                    <div class="search-bar">
+                        <input type="text" class="search-input" placeholder="Search sections...">
+                    </div>
+                    <button type="button" class="btn-add modal-trigger" data-modal-target="addSectionModal">+ Add Section</button>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title">Manage Sections</h3>
+                    </div>
+                    <div class="panel-body">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Section Name</th>
+                                    <th>Program</th>
+                                    <th>Year Level</th>
+                                    <th>Term</th>
+                                    <th class="text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="subject-code">BSIT-3A</span></td>
+                                    <td>BSIT</td>
+                                    <td>3rd Year</td>
+                                    <td>2025-2026 &bull; 2nd Sem</td>
+                                    <td class="text-right">
+                                        <div class="action-btns justify-end">
+                                            <button class="btn-edit modal-trigger" data-modal-target="editSectionModal">Edit</button>
+                                            <button class="btn-delete">Delete</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<div class="modal-overlay" id="addStudentModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title">Add New Student</h3>
+            <button class="modal-close modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-row">
+                <div class="admin-form-group">
+                    <label class="admin-label">Student ID</label>
+                    <input type="text" class="admin-input" placeholder="e.g. 2026-001">
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-label">Full Name</label>
+                    <input type="text" class="admin-input" placeholder="e.g. Juan Dela Cruz">
+                </div>
+            </div>
+            <div class="admin-form-group">
+                <label class="admin-label">Email</label>
+                <input type="email" class="admin-input" placeholder="student@lcc.edu">
+            </div>
+            <div class="form-row">
+                <div class="admin-form-group">
+                    <label class="admin-label">Program</label>
+                    <select class="admin-input">
+                        <option>BSIT</option>
+                        <option>BSCS</option>
+                    </select>
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-label">Section</label>
+                    <select class="admin-input">
+                        <option>BSIT-3A</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel modal-close-btn">Cancel</button>
+            <button class="btn-submit">Save Student</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="addTeacherModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title">Add New Teacher</h3>
+            <button class="modal-close modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-row">
+                <div class="admin-form-group">
+                    <label class="admin-label">Username</label>
+                    <input type="text" class="admin-input" placeholder="t.janedoe">
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-label">Full Name</label>
+                    <input type="text" class="admin-input" placeholder="Jane Doe">
+                </div>
+            </div>
+            <div class="admin-form-group">
+                <label class="admin-label">Department</label>
+                <input type="text" class="admin-input" placeholder="College of Computer Studies">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel modal-close-btn">Cancel</button>
+            <button class="btn-submit">Save Teacher</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="addSectionModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title">Add New Section</h3>
+            <button class="modal-close modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-row">
+                <div class="admin-form-group">
+                    <label class="admin-label">Section Name</label>
+                    <input type="text" class="admin-input" placeholder="e.g. BSIT-3A">
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-label">Program</label>
+                    <select class="admin-input">
+                        <option>BSIT</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="admin-form-group">
+                    <label class="admin-label">Year Level</label>
+                    <select class="admin-input">
+                        <option>1st Year</option>
+                        <option>2nd Year</option>
+                        <option>3rd Year</option>
+                        <option>4th Year</option>
+                    </select>
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-label">Semester</label>
+                    <select class="admin-input">
+                        <option>1st Semester</option>
+                        <option>2nd Semester</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel modal-close-btn">Cancel</button>
+            <button class="btn-submit">Save Section</button>
+        </div>
+    </div>
+</div>
+
+<script src="js/dashboard.js"></script>
+<script src="js/admin-dashboard.js"></script>
+
+</body>
+</html>

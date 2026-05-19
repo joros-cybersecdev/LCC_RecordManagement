@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LCC Portal — La Consolacion College</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/lcc-style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <img src="images/logo.png" alt="LCC Logo" class="brand-logo">
+                <div class="brand-text">
+                    <span class="brand-name">La Consolacion College</span>
+                    <span class="brand-sub">Web-Based Records Management System</span>
+                </div>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link active">Home</a>
+                <a href="#about" class="nav-link">About</a>
+                <a href="#features" class="nav-link">Features</a>
+                <a href="login.html" class="btn-nav">Login</a>
+            </div>
+            <button class="mobile-menu-btn">&#9776;</button>
+        </div>
+        <div class="mobile-menu" id="mobileMenu">
+            <a href="index.html" class="mobile-link">Home</a>
+            <a href="#about" class="mobile-link">About</a>
+            <a href="#features" class="mobile-link">Features</a>
+            <a href="login.html" class="mobile-link">Login</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-container hero-two-col">
+
+            <div class="hero-left">
+                <div class="hero-badge">College Department Portal</div>
+
+                <h1 class="hero-title">
+                    La Consolacion College<br>
+                    <span class="hero-highlight">Records Management System</span>
+                </h1>
+
+                <p class="hero-desc">
+                    A secure and centralized platform for managing student academic
+                    records. Access your grades, subjects, and academic information
+                    all in one place.
+                </p>
+
+                <div class="hero-buttons">
+                    <a href="login.html" class="btn-primary">
+                        Login to Portal
+                        <span class="btn-arrow">&#8594;</span>
+                    </a>
+                </div>
+
+                <div class="hero-trust">
+                    <div class="trust-item">
+                        <span class="trust-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        </span>
+                        <div>
+                            <div class="trust-label">Secure</div>
+                            <div class="trust-sub">Your data is protected</div>
+                        </div>
+                    </div>
+                    <div class="trust-item">
+                        <span class="trust-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        </span>
+                        <div>
+                            <div class="trust-label">Role-Based</div>
+                            <div class="trust-sub">Access based on your role</div>
+                        </div>
+                    </div>
+                    <div class="trust-item">
+                        <span class="trust-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        </span>
+                        <div>
+                            <div class="trust-label">24/7 Access</div>
+                            <div class="trust-sub">Access anytime, anywhere</div>
+                        </div>
+                    </div>
+                    <div class="trust-item">
+                        <span class="trust-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        </span>
+                        <div>
+                            <div class="trust-label">Trusted</div>
+                            <div class="trust-sub">Built for La Consolacion College</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-right">
+                <div class="hero-visual">
+                    <div class="hero-building">
+                        <img src="images/building.png" alt="La Consolacion College Building" class="building-img" onerror="this.style.display='none'">
+                        <div class="building-fallback"></div>
+                    </div>
+                    <div class="laptop-wrapper">
+                        <div class="laptop-mockup">
+                            <div class="laptop-screen">
+                                <div class="dash-preview">
+                                    <div class="dash-header">
+                                        <span class="dash-title">Dashboard</span>
+                                        <div class="dash-icons">
+                                            <span class="dash-bell">&#128276;</span>
+                                            <span class="dash-avatar">JD</span>
+                                        </div>
+                                    </div>
+                                    <div class="dash-welcome">Welcome back,<br><strong>John Doe</strong></div>
+                                    <div class="dash-stats-row">
+                                        <div class="dash-stat pink">
+                                            <div class="ds-icon">&#128100;</div>
+                                            <div class="ds-val">1.45</div>
+                                            <div class="ds-sub">Student<br><em>Very Good</em></div>
+                                        </div>
+                                        <div class="dash-stat green">
+                                            <div class="ds-icon">&#128218;</div>
+                                            <div class="ds-val">6</div>
+                                            <div class="ds-sub">General Average<br><em>Subjects</em></div>
+                                        </div>
+                                        <div class="dash-stat blue">
+                                            <div class="ds-icon">&#128203;</div>
+                                            <div class="ds-val">21</div>
+                                            <div class="ds-sub">Enrolled Subjects<br><em>Units Enrolled</em></div>
+                                        </div>
+                                    </div>
+                                    <div class="dash-two-col">
+                                        <div class="dash-grades">
+                                            <div class="dg-title">Recent Grades</div>
+                                            <div class="dg-table">
+                                                <div class="dg-row header"><span>Subject</span><span>Grade</span><span>Status</span></div>
+                                                <div class="dg-row"><span>Data Structures</span><span>1.25</span><span class="badge-pass">Passed</span></div>
+                                                <div class="dg-row"><span>Database Mgmt</span><span>1.75</span><span class="badge-pass">Passed</span></div>
+                                                <div class="dg-row"><span>Web Development</span><span>1.50</span><span class="badge-pass">Passed</span></div>
+                                                <div class="dg-row"><span>Discrete Math</span><span>1.25</span><span class="badge-pass">Passed</span></div>
+                                                <div class="dg-row"><span>Info Management</span><span>1.75</span><span class="badge-pass">Passed</span></div>
+                                            </div>
+                                        </div>
+                                        <div class="dash-announce">
+                                            <div class="dg-title">Announcements</div>
+                                            <div class="ann-list">
+                                                <div class="ann-item">&#128994; Enrollment for 2nd Semester<br><small>May 20, 2026</small></div>
+                                                <div class="ann-item">&#128994; Tuition Fee Reminder<br><small>May 22, 2026</small></div>
+                                                <div class="ann-item">&#128994; Foundation Day Celebration<br><small>May 31, 2026</small></div>
+                                            </div>
+                                            <div class="ann-more">View All Announcements</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="laptop-hinge"></div>
+                            <div class="laptop-base">
+                                <div class="laptop-notch"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-badge">System Features</span>
+                <h2 class="section-title">Centralized Academic Records System</h2>
+                <p class="section-desc">Designed for students, teachers, and administrators of La Consolacion College.</p>
+            </div>
+
+            <div class="features-grid">
+
+                <div class="feature-card">
+                    <div class="feature-icon fi-blue">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                    <h3 class="feature-title">Student Grade Viewing</h3>
+                    <p class="feature-text">Students can view their grades once their tuition is fully paid and the teacher has granted access.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon fi-blue">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                    </div>
+                    <h3 class="feature-title">Teacher Grade Management</h3>
+                    <p class="feature-text">Teachers can input and manage grades for their specific subjects and sections only.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon fi-blue">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    </div>
+                    <h3 class="feature-title">Access Control</h3>
+                    <p class="feature-text">Teachers control which students can view their grades. Admin manages payment status per student.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon fi-blue">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+                    </div>
+                    <h3 class="feature-title">Admin Management</h3>
+                    <p class="feature-text">Admin manages all student and teacher accounts, payment status, sections, and subjects.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon fi-blue">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    </div>
+                    <h3 class="feature-title">Program Management</h3>
+                    <p class="feature-text">Supports BSHM, BSIT, and BSBA programs including BSBA majors in Financial and Business Management.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon fi-blue">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    </div>
+                    <h3 class="feature-title">Secure Role-Based Access</h3>
+                    <p class="feature-text">Each user only sees what they are allowed to see. Students, teachers, and admins have separate dashboards.</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section class="about" id="about">
+        <div class="section-container">
+            <div class="about-grid">
+                <div class="about-content">
+                    <span class="section-badge">About the System</span>
+                    <h2 class="about-title">Built for La Consolacion College</h2>
+                    <p class="about-text">
+                        This Web-Based Records Management System was developed exclusively for the college department
+                        of La Consolacion College. It replaces traditional and manual methods of managing academic
+                        records with a centralized, secure, and efficient digital platform.
+                    </p>
+                    <div class="about-list">
+                        <div class="about-list-item">
+                            <span class="about-check">&#10003;</span>
+                            <span>Students view grades only after paying tuition</span>
+                        </div>
+                        <div class="about-list-item">
+                            <span class="about-check">&#10003;</span>
+                            <span>Teachers manage grades for their own subjects only</span>
+                        </div>
+                        <div class="about-list-item">
+                            <span class="about-check">&#10003;</span>
+                            <span>Admin controls payment status and all accounts</span>
+                        </div>
+                        <div class="about-list-item">
+                            <span class="about-check">&#10003;</span>
+                            <span>Supports BSHM, BSIT, and BSBA programs</span>
+                        </div>
+                        <div class="about-list-item">
+                            <span class="about-check">&#10003;</span>
+                            <span>Evaluated based on ISO 25010 quality standards</span>
+                        </div>
+                    </div>
+                    <a href="login.html" class="btn-primary" style="margin-top: 2rem; display: inline-flex;">
+                        Get Started &rarr;
+                    </a>
+                </div>
+
+                <div class="about-roles">
+                    <div class="role-card">
+                        <div class="role-icon student-icon">S</div>
+                        <div class="role-info">
+                            <span class="role-title">Student</span>
+                            <span class="role-desc">View subjects, program info, and grades if access is granted</span>
+                        </div>
+                    </div>
+                    <div class="role-card">
+                        <div class="role-icon teacher-icon">T</div>
+                        <div class="role-info">
+                            <span class="role-title">Teacher</span>
+                            <span class="role-desc">Input grades and control student grade visibility per subject</span>
+                        </div>
+                    </div>
+                    <div class="role-card">
+                        <div class="role-icon admin-icon">A</div>
+                        <div class="role-info">
+                            <span class="role-title">Admin</span>
+                            <span class="role-desc">Manage all accounts, payment status, sections, and subjects</span>
+                        </div>
+                    </div>
+                    <div class="programs-box">
+                        <p class="programs-label">Programs Offered</p>
+                        <div class="programs-list">
+                            <span class="program-tag">BSHM</span>
+                            <span class="program-tag">BSIT</span>
+                            <span class="program-tag">BSBA - Financial Management</span>
+                            <span class="program-tag">BSBA - Business Management</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <p class="footer-copy">© 2026 La Consolacion College — Records Management System</p>
+        </div>
+    </footer>
+
+    <script src="js/lcc.js"></script>
+    <script>
+        function toggleMenu() {
+            document.getElementById('mobileMenu').classList.toggle('open');
+        }
+    </script>
+
+</body>
+</html>
