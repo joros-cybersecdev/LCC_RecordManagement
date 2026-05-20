@@ -215,8 +215,8 @@
                                     <td class="text-right">
                                         <div class="action-btns justify-end">
                                             <button class="btn-unpaid">Mark Unpaid</button>
-                                            <button class="btn-edit modal-trigger" data-modal-target="editStudentModal">Edit</button>
-                                            <button class="btn-delete">Delete</button>
+                                            <button class="btn-action btn-edit modal-trigger" data-modal-target="editStudentModal">Edit</button>
+                                            <button class="btn-action btn-delete">Delete</button>
                                         </div>
                                     </td>
                                 </tr>
@@ -228,8 +228,8 @@
                                     <td class="text-right">
                                         <div class="action-btns justify-end">
                                             <button class="btn-paid">Mark Paid</button>
-                                            <button class="btn-edit modal-trigger" data-modal-target="editStudentModal">Edit</button>
-                                            <button class="btn-delete">Delete</button>
+                                            <button class="btn-action btn-edit modal-trigger" data-modal-target="editStudentModal">Edit</button>
+                                            <button class="btn-action btn-delete">Delete</button>
                                         </div>
                                     </td>
                                 </tr>
@@ -240,28 +240,12 @@
             </div>
 
             <div id="teachers-view" class="view-section hidden">
-                <div class="panel-toolbar filter-bar">
-                    <div class="search-bar">
-                        <input type="text" class="search-input" placeholder="Search faculty...">
-                    </div>
-                    <button type="button" class="btn-add modal-trigger" data-modal-target="addTeacherModal">+ Add Teacher</button>
-                </div>
-
                 <div class="panel">
                     <div class="panel-header">
                         <h3 class="panel-title">Faculty Roster</h3>
                     </div>
                     <div class="panel-body">
                         <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Username</th>
-                                    <th>Full Name</th>
-                                    <th>Email</th>
-                                    <th>Department</th>
-                                    <th class="text-right">Actions</th>
-                                </tr>
-                            </thead>
                             <tbody>
                                 <tr>
                                     <td><span class="subject-code">t.janedoe</span></td>
@@ -270,8 +254,13 @@
                                     <td>College of Computer Studies</td>
                                     <td class="text-right">
                                         <div class="action-btns justify-end">
-                                            <button class="btn-edit modal-trigger" data-modal-target="editTeacherModal">Edit</button>
-                                            <button class="btn-delete">Delete</button>
+                                            
+                                            <button class="btn-action btn-access modal-trigger" data-modal-target="manageSubjectsModal" title="Manage Assigned Subjects">
+                                                &#128218; Subjects
+                                            </button>
+                                            
+                                            <button class="btn-action btn-edit modal-trigger" data-modal-target="editTeacherModal">Edit</button>
+                                            <button class="btn-action btn-delete">Delete</button>
                                         </div>
                                     </td>
                                 </tr>
@@ -279,7 +268,6 @@
                         </table>
                     </div>
                 </div>
-            </div>
 
             <div id="sections-view" class="view-section hidden">
                 <div class="panel-toolbar filter-bar">
@@ -313,7 +301,7 @@
                                     <td class="text-right">
                                         <div class="action-btns justify-end">
                                             <button class="btn-edit modal-trigger" data-modal-target="editSectionModal">Edit</button>
-                                            <button class="btn-delete">Delete</button>
+                                            <button class="btn-action btn-delete">Delete</button>
                                         </div>
                                     </td>
                                 </tr>
@@ -441,6 +429,103 @@
         <div class="modal-footer">
             <button class="btn-cancel modal-close-btn">Cancel</button>
             <button class="btn-submit">Save Section</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="editStudentModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title">Edit Student</h3>
+            <button class="modal-close modal-close-btn">&times;</button>
+        </div>
+        </div>
+</div>
+
+<div class="modal-overlay" id="manageSubjectsModal">
+    <div class="modal" style="max-width: 650px;"> 
+        <div class="modal-header">
+            <h3 class="modal-title">Assigned Subjects - Jane Doe</h3>
+            <button class="modal-close modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+            
+            <div class="panel-toolbar filter-bar" style="box-shadow: none; padding: 0 0 1rem 0; border: none; background: transparent;">
+                <div class="search-bar">
+                    <input type="text" class="search-input" placeholder="Search assigned subjects...">
+                </div>
+                <button type="button" class="btn-add modal-trigger" data-modal-target="assignNewSubjectModal">+ Assign Subject</button>
+            </div>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Subject Title</th>
+                        <th>Section</th>
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="subject-code">IT301</span></td>
+                        <td><strong>Web Development II</strong></td>
+                        <td>BSIT-3A</td>
+                        <td class="text-right">
+                            <div class="action-btns justify-end">
+                                <button class="btn-action btn-delete">Unassign</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="subject-code">IT302</span></td>
+                        <td><strong>Database Management Systems</strong></td>
+                        <td>BSIT-3A</td>
+                        <td class="text-right">
+                            <div class="action-btns justify-end">
+                                <button class="btn-action btn-delete">Unassign</button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel modal-close-btn">Close Panel</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="assignNewSubjectModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title">Assign Subject to Jane Doe</h3>
+            <button class="modal-close modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="admin-form-group">
+                <label class="admin-label">Select Subject</label>
+                <select class="admin-input">
+                    <option value="" disabled selected>Choose a subject...</option>
+                    <option>IT303 - Systems Integration and Architecture</option>
+                    <option>IT304 - Advanced Database Systems</option>
+                    <option>CS101 - Introduction to Computing</option>
+                </select>
+            </div>
+            <div class="admin-form-group">
+                <label class="admin-label">Select Section</label>
+                <select class="admin-input">
+                    <option value="" disabled selected>Choose a section...</option>
+                    <option>BSIT-3A</option>
+                    <option>BSIT-3B</option>
+                    <option>BSCS-1A</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel modal-close-btn">Cancel</button>
+            <button class="btn-submit">Confirm Assignment</button>
         </div>
     </div>
 </div>
