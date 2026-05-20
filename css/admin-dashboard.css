@@ -177,3 +177,31 @@
     width: 88%; 
     background: #22c55e;
 }
+
+/* =========================================
+   SCROLLABLE MODAL TABLES
+   ========================================= */
+
+.table-scroll-wrapper {
+    max-height: 45vh; /* Limits the height dynamically based on screen size */
+    overflow-y: auto;
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+}
+
+/* Make the table headers stick to the top when scrolling */
+.table-scroll-wrapper .data-table th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--gray-50);
+    
+    /* Replaces the standard border-bottom so it moves with the sticky header */
+    border-bottom: none;
+    box-shadow: 0 1px 0 var(--gray-200); 
+}
+
+/* Ensure the table itself doesn't cause horizontal overflow issues */
+.table-scroll-wrapper .data-table {
+    margin-bottom: 0;
+}

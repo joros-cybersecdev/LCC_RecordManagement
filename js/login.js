@@ -23,7 +23,7 @@ class Navigation {
 
 /**
  * LoginForm Class
- * Handles dynamic role selection and password visibility on the login page.
+ * Handles dynamic role selection, password visibility, and mock authentication.
  */
 class LoginForm {
     constructor() {
@@ -33,6 +33,10 @@ class LoginForm {
         this.usernameInput = document.getElementById('username');
         this.passwordInput = document.getElementById('password');
         this.togglePassBtn = document.querySelector('.toggle-pass');
+        
+        // Form elements for mock authentication
+        this.loginForm = document.getElementById('loginForm');
+        this.loginAlert = document.getElementById('loginAlert');
 
         // Only initialize if we are actually on the login page
         if (this.roleButtons.length > 0) {
@@ -49,6 +53,11 @@ class LoginForm {
         // Bind password visibility toggle
         if (this.togglePassBtn && this.passwordInput) {
             this.togglePassBtn.addEventListener('click', () => this.togglePassword());
+        }
+
+        // Bind form submission for mock authentication
+        if (this.loginForm) {
+            this.loginForm.addEventListener('submit', (e) => this.handleLogin(e));
         }
     }
 
@@ -81,6 +90,78 @@ class LoginForm {
         } else {
             this.passwordInput.type = 'password';
             this.togglePassBtn.textContent = 'Show';
+        }
+    }
+
+    // --- MOCK AUTHENTICATION LOGIC ---
+    handleLogin(e) {
+        e.preventDefault(); 
+
+        const role = this.roleInput.value;
+        const username = this.usernameInput.value.trim();
+        const password = this.passwordInput.value;
+
+        // Fetch dynamic teachers added from the admin dashboard
+        const dynamicTeachers = JSON.parse(localStorage.getItem('facultyMembers')) || [];
+        
+        const validAdmins = ['admin'];
+        const validStudents = ['2026-001', '2026-002'];
+
+        if (this.loginAlert) {
+            this.loginAlert.classList.add('hidden-alert');
+        }
+
+        if (password !== 'admin123') {
+            this.showError('Invalid password. Please try again.');
+            return;
+        }
+
+        // --- NEW: Dynamic Teacher Verification & Session Tracking ---
+        if (role === 'teacher') {
+            let matchedTeacher = null;
+
+            // Check if it's the default teacher OR a newly added dynamic teacher
+            if (username === 't.janedoe') {
+                matchedTeacher = { username: 't.janedoe', fullname: 'Jane Doe', department: 'College of Computer Studies' };
+            } else {
+                matchedTeacher = dynamicTeachers.find(t => t.username === username);
+            }
+
+            if (matchedTeacher) {
+                // Save the session data so the dashboard knows who logged in!
+                localStorage.setItem('currentUser', JSON.stringify({
+                    role: 'teacher',
+                    username: matchedTeacher.username,
+                    fullname: matchedTeacher.fullname,
+                    department: matchedTeacher.department
+                }));
+                window.location.href = 'teacher-dashboard.html';
+            } else {
+                this.showError('Teacher account not found.');
+            }
+        } 
+        // ------------------------------------------------------------
+        else if (role === 'admin') {
+            if (validAdmins.includes(username)) {
+                window.location.href = 'admin-dashboard.html';
+            } else {
+                this.showError('Admin account not found.');
+            }
+        } 
+        else if (role === 'student') {
+            if (validStudents.includes(username)) {
+                window.location.href = 'student-dashboard.html';
+            } else {
+                this.showError('Student account not found.');
+            }
+        }
+    }
+
+    showError(message) {
+        if (this.loginAlert) {
+            this.loginAlert.textContent = message;
+            // Make the block viewable by stripping the hiding class away
+            this.loginAlert.classList.remove('hidden-alert');
         }
     }
 }
