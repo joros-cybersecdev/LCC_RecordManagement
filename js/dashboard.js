@@ -20,15 +20,15 @@ class PortalApp {
     }
 
     initEvents() {
-        // Sidebar toggle
+        // Handle Sidebar toggle button clicks
         this.toggleBtns.forEach(btn => {
             btn.addEventListener('click', () => this.toggleSidebar());
         });
 
-        // Navigation routing
+        // Handle Tab/Navigation routing
         this.navLinks.forEach(link => {
             link.addEventListener('click', (e) => {
-                e.preventDefault(); // Stop the page from reloading
+                e.preventDefault(); // Stop the page from refreshing
                 this.switchView(e.currentTarget);
             });
         });
@@ -41,29 +41,34 @@ class PortalApp {
     }
 
     switchView(clickedLink) {
-        // 1. Change Active state on sidebar
+        // 1. Remove 'active' class from all links, add to the clicked one
         this.navLinks.forEach(link => link.classList.remove('active'));
         clickedLink.classList.add('active');
 
-        // 2. Hide all views, then show the target view
-        const targetId = clickedLink.getAttribute('data-target');
+        // 2. Hide all views
         this.views.forEach(view => view.classList.add('hidden'));
-        document.getElementById(targetId).classList.remove('hidden');
+        
+        // 3. Find and show the target view based on data-target attribute
+        const targetId = clickedLink.getAttribute('data-target');
+        const targetView = document.getElementById(targetId);
+        if (targetView) {
+            targetView.classList.remove('hidden');
+        }
 
-        // 3. Update Header Title & Subtitle dynamically
+        // 4. Update Header Title & Subtitle dynamically
         if (this.pageTitle && this.pageSubtitle) {
             this.pageTitle.textContent = clickedLink.getAttribute('data-title');
             this.pageSubtitle.textContent = clickedLink.getAttribute('data-subtitle');
         }
 
-        // 4. Auto-close sidebar on mobile after clicking a link
+        // 5. Auto-close sidebar on mobile screens after clicking a link
         if (window.innerWidth <= 820 && this.sidebar) {
             this.sidebar.classList.remove('sidebar-open');
         }
     }
 }
 
-// Initialize when DOM is ready
+// Start the application when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     new PortalApp();
 });

@@ -31,23 +31,20 @@
         </div>
 
         <nav class="sidebar-nav">
-            <span class="nav-section-label">Main Menu</span>
-            
             <a href="#" class="sidebar-link active" data-target="student-dashboard-view" data-title="Dashboard" data-subtitle="Welcome back, John!">
                 <div class="sidebar-link-icon">📊</div>
                 Dashboard
             </a>
-            <a href="#" class="sidebar-link" data-target="subjects-view" data-title="My Subjects" data-subtitle="Section A • 2025-2026 • 2nd Semester">
+            <a href="#" class="sidebar-link" data-target="subjects-view" data-title="My Subjects" data-subtitle="Section A • 2026-2027 • 2nd Semester">
                 <div class="sidebar-link-icon">📚</div>
                 My Subjects
             </a>
-            <a href="#" class="sidebar-link" data-target="grades-view" data-title="My Grades" data-subtitle="2025-2026 • 2nd Semester">
-                <div class="sidebar-link-icon">A+</div>
+            <a href="#" class="sidebar-link" data-target="grades-view" data-title="My Grades" data-subtitle="2026-2027 • 2nd Semester">
+                <div class="sidebar-link-icon">🎓</div>
                 My Grades
             </a>
             
-            <span class="nav-section-label" style="margin-top: auto;">Account</span>
-            <a href="login.html" class="sidebar-link logout-link">
+            <a href="login.html" class="sidebar-link logout-link mt-auto">
                 <div class="sidebar-link-icon">🚪</div>
                 Logout
             </a>
@@ -76,12 +73,13 @@
         <div class="dashboard-content">
 
             <div id="student-dashboard-view" class="view-section">
+                
                 <div class="info-banner">
                     <div class="info-banner-left">
                         <div class="info-avatar">J</div>
                         <div class="info-details">
                             <h2 class="info-name">John Doe</h2>
-                            <p class="info-meta">2026-001234 • BSIT • 3rd Year • Section A</p>
+                            <p class="info-meta">ID: 26-0001 &bull; Section: BSIT-3A &bull; SY: 2026-2027</p>
                         </div>
                     </div>
                     <div class="info-right">
@@ -89,34 +87,28 @@
                     </div>
                 </div>
 
-                <div class="cards-grid">
+                <div class="cards-grid centered-stats">
                     <div class="stat-card blue">
                         <div class="stat-card-icon">📈</div>
                         <div class="stat-card-body">
-                            <span class="stat-card-label">GWA</span>
+                            <span class="stat-card-label">General Weighted Average</span>
                             <span class="stat-card-value">1.45</span>
                         </div>
                     </div>
                     <div class="stat-card indigo">
                         <div class="stat-card-icon">📘</div>
                         <div class="stat-card-body">
-                            <span class="stat-card-label">Total Subjects</span>
-                            <span class="stat-card-value">6</span>
-                        </div>
-                    </div>
-                    <div class="stat-card green">
-                        <div class="stat-card-icon">✅</div>
-                        <div class="stat-card-body">
-                            <span class="stat-card-label">Units Completed</span>
-                            <span class="stat-card-value">18</span>
+                            <span class="stat-card-label">Total Subjects Enrolled</span>
+                            <span class="stat-card-value">8</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="bottom-grid">
+                    
                     <div class="panel">
                         <div class="panel-header">
-                            <h3 class="panel-title">My Subjects (Current Semester)</h3>
+                            <h3 class="panel-title">Recent Subjects</h3>
                         </div>
                         <div class="panel-body">
                             <table class="data-table">
@@ -125,6 +117,7 @@
                                         <th>Code</th>
                                         <th>Subject</th>
                                         <th>Units</th>
+                                        <th>Semester</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -132,11 +125,25 @@
                                         <td><span class="subject-code">IT301</span></td>
                                         <td>Web Development II</td>
                                         <td>3</td>
+                                        <td><span class="sem-label sem-current">2nd Sem</span></td>
                                     </tr>
                                     <tr>
                                         <td><span class="subject-code">IT302</span></td>
                                         <td>Database Management Systems</td>
                                         <td>3</td>
+                                        <td><span class="sem-label sem-current">2nd Sem</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="subject-code">IT205</span></td>
+                                        <td>Systems Analysis and Design</td>
+                                        <td>3</td>
+                                        <td><span class="sem-label sem-past">1st Sem</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="subject-code">IT206</span></td>
+                                        <td>Networking I</td>
+                                        <td>3</td>
+                                        <td><span class="sem-label sem-past">1st Sem</span></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -147,40 +154,46 @@
                         <div class="panel-header">
                             <h3 class="panel-title">Notices</h3>
                         </div>
-                        <div class="panel-body" style="padding: 1.5rem;">
+                        <div class="panel-body panel-body-spaced">
                             <div class="notice-bar">
-                                <div class="notice-icon">⚠️</div>
-                                <div>Final examinations will begin on May 25, 2026. Please secure your examination permits.</div>
+                                <div class="notice-icon">📝</div>
+                                <div>Midterm examinations will begin on March 15, 2027. Please secure your examination permits from the cashier.</div>
+                            </div>
+                            <div class="notice-bar notice-privacy">
+                                <div class="notice-icon">🔒</div>
+                                <div><strong>Grade Privacy:</strong> Portal access is view-only. Grades remain locked and hidden until explicitly enabled by your instructor.</div>
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div>
 
             <div id="subjects-view" class="view-section hidden">
-                <div class="info-banner" style="background: linear-gradient(135deg, #0369a1, #0c4a6e);">
+                
+                <div class="info-banner info-banner-alt">
                     <div class="info-banner-left">
                         <div class="info-avatar">📚</div>
                         <div class="info-details">
-                            <h2 class="info-name">Enrolled Subjects</h2>
-                            <p class="info-meta">BSIT • 3rd Year • Section A • 2025-2026 2nd Sem</p>
+                            <h2 class="info-name">John Doe</h2>
+                            <p class="info-meta">BSIT &bull; 3rd Year &bull; Section A</p>
                         </div>
                     </div>
                     <div class="info-right">
-                        <span class="payment-badge paid">6 Subjects</span>
+                        <span class="subject-count-badge">8 Subjects Total</span>
                     </div>
                 </div>
 
-                <div class="panel" style="margin-top: 1.5rem;">
+                <div class="panel">
                     <div class="panel-header">
-                        <h3 class="panel-title">Subject Schedule & Instructors</h3>
+                        <h3 class="panel-title">Class Schedules and Instructors</h3>
                     </div>
                     <div class="panel-body">
                         <table class="data-table">
                             <thead>
                                 <tr>
                                     <th>Code</th>
-                                    <th>Description</th>
+                                    <th>Description/Subject</th>
                                     <th>Units</th>
                                     <th>Instructor</th>
                                     <th>Schedule</th>
@@ -188,25 +201,61 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td><span class="subject-code">IT301</span></td>
+                                    <td><span class="subject-code">IT301</span><br><span class="sem-label sem-current">2nd Sem</span></td>
                                     <td>Web Development II</td>
                                     <td>3</td>
                                     <td>Mr. Juan Dela Cruz</td>
                                     <td>MWF 8:00 AM - 9:00 AM</td>
                                 </tr>
                                 <tr>
-                                    <td><span class="subject-code">IT302</span></td>
+                                    <td><span class="subject-code">IT302</span><br><span class="sem-label sem-current">2nd Sem</span></td>
                                     <td>Database Management Systems</td>
                                     <td>3</td>
                                     <td>Ms. Maria Santos</td>
                                     <td>TTH 10:00 AM - 11:30 AM</td>
                                 </tr>
                                 <tr>
-                                    <td><span class="subject-code">IT303</span></td>
-                                    <td>Systems Integration and Architecture</td>
+                                    <td><span class="subject-code">IT303</span><br><span class="sem-label sem-current">2nd Sem</span></td>
+                                    <td>Systems Integration</td>
                                     <td>3</td>
                                     <td>Dr. Alan Turing</td>
-                                    <td>MWF 1:00 PM - 2:00 PM</td>
+                                    <td>MWF 1:00 PM - 2:30 PM</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="subject-code">IT304</span><br><span class="sem-label sem-current">2nd Sem</span></td>
+                                    <td>Mobile App Development</td>
+                                    <td>3</td>
+                                    <td>Mr. Linus Torvalds</td>
+                                    <td>TTH 1:00 PM - 2:30 PM</td>
+                                </tr>
+
+                                <tr>
+                                    <td><span class="subject-code">IT205</span><br><span class="sem-label sem-past">1st Sem</span></td>
+                                    <td>Systems Analysis and Design</td>
+                                    <td>3</td>
+                                    <td>Dr. Ada Lovelace</td>
+                                    <td>MWF 9:00 AM - 10:00 AM</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="subject-code">IT206</span><br><span class="sem-label sem-past">1st Sem</span></td>
+                                    <td>Networking I</td>
+                                    <td>3</td>
+                                    <td>Mr. Tim Berners-Lee</td>
+                                    <td>TTH 8:00 AM - 9:30 AM</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="subject-code">IT207</span><br><span class="sem-label sem-past">1st Sem</span></td>
+                                    <td>Information Assurance</td>
+                                    <td>3</td>
+                                    <td>Ms. Grace Hopper</td>
+                                    <td>MWF 10:00 AM - 11:00 AM</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="subject-code">IT208</span><br><span class="sem-label sem-past">1st Sem</span></td>
+                                    <td>Quantitative Methods</td>
+                                    <td>3</td>
+                                    <td>Mr. John von Neumann</td>
+                                    <td>TTH 3:00 PM - 4:30 PM</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -215,33 +264,27 @@
             </div>
 
             <div id="grades-view" class="view-section hidden">
-                <div class="cards-grid">
+                <div class="cards-grid centered-stats">
                     <div class="stat-card sky">
                         <div class="stat-card-icon">🎓</div>
                         <div class="stat-card-body">
                             <span class="stat-card-label">Total Units</span>
-                            <span class="stat-card-value">18</span>
+                            <span class="stat-card-value">24</span>
                         </div>
                     </div>
                     <div class="stat-card violet">
                         <div class="stat-card-icon">👁️</div>
                         <div class="stat-card-body">
                             <span class="stat-card-label">Grades Viewable</span>
-                            <span class="stat-card-value">5</span>
+                            <span class="stat-card-value">6</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="panel" style="margin-top: 1.5rem;">
+                <div class="panel">
                     <div class="panel-header">
                         <h3 class="panel-title">Grade Report</h3>
-                        <div class="filter-bar" style="padding: 0.5rem; border: none; box-shadow: none;">
-                            <span class="filter-label">Semester:</span>
-                            <select class="filter-select">
-                                <option>2025-2026 • 2nd Semester</option>
-                                <option>2025-2026 • 1st Semester</option>
-                            </select>
-                        </div>
+                        <span class="panel-subtitle">2026-2027 &bull; 2nd Semester</span>
                     </div>
                     <div class="panel-body">
                         <table class="data-table">
@@ -258,19 +301,19 @@
                                     <td><span class="subject-code">IT301</span></td>
                                     <td>Web Development II</td>
                                     <td><span class="grade-pill grade-high">1.25</span></td>
-                                    <td><span class="access-badge unlocked">Passed</span></td>
+                                    <td><span class="access-badge unlocked">Unlocked</span></td>
                                 </tr>
                                 <tr>
                                     <td><span class="subject-code">IT302</span></td>
                                     <td>Database Management Systems</td>
                                     <td><span class="grade-pill grade-high">1.50</span></td>
-                                    <td><span class="access-badge unlocked">Passed</span></td>
+                                    <td><span class="access-badge unlocked">Unlocked</span></td>
                                 </tr>
                                 <tr>
                                     <td><span class="subject-code">IT303</span></td>
-                                    <td>Systems Integration and Architecture</td>
+                                    <td>Systems Integration</td>
                                     <td><span class="grade-pill grade-locked">--</span></td>
-                                    <td><span class="access-badge locked">Locked</span></td>
+                                    <td><span class="access-badge locked">Locked by Teacher</span></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -283,5 +326,6 @@
 </div>
 
 <script src="js/dashboard.js"></script>
+
 </body>
 </html>
