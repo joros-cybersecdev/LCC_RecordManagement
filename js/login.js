@@ -23,7 +23,7 @@ class Navigation {
 
 /**
  * LoginForm Class
- * Handles dynamic role selection and password visibility on the login page.
+ * Handles dynamic role selection, password visibility, and mock authentication.
  */
 class LoginForm {
     constructor() {
@@ -33,6 +33,10 @@ class LoginForm {
         this.usernameInput = document.getElementById('username');
         this.passwordInput = document.getElementById('password');
         this.togglePassBtn = document.querySelector('.toggle-pass');
+        
+        // Form elements for mock authentication
+        this.loginForm = document.getElementById('loginForm');
+        this.loginAlert = document.getElementById('loginAlert');
 
         // Only initialize if we are actually on the login page
         if (this.roleButtons.length > 0) {
@@ -49,6 +53,11 @@ class LoginForm {
         // Bind password visibility toggle
         if (this.togglePassBtn && this.passwordInput) {
             this.togglePassBtn.addEventListener('click', () => this.togglePassword());
+        }
+
+        // Bind form submission for mock authentication
+        if (this.loginForm) {
+            this.loginForm.addEventListener('submit', (e) => this.handleLogin(e));
         }
     }
 
@@ -83,12 +92,90 @@ class LoginForm {
             this.togglePassBtn.textContent = 'Show';
         }
     }
+
+    // --- MOCK AUTHENTICATION LOGIC ---
+    handleLogin(e) {
+        e.preventDefault(); 
+
+        const role = this.roleInput.value;
+        const username = this.usernameInput.value.trim();
+        const password = this.passwordInput.value;
+
+        // Fetch dynamic teachers added from the admin dashboard
+        const dynamicTeachers = JSON.parse(localStorage.getItem('facultyMembers')) || [];
+        
+        const validAdmins = ['admin'];
+
+        // Shared Student DB 
+        const studentsDB = {
+            '2026-001': { id: '2026-001', name: 'John Doe', section: 'BSIT-3A', program: 'BSIT', year: '3rd Year', status: 'paid' },
+            '2026-002': { id: '2026-002', name: 'Maria Clara', section: 'BSIT-3A', program: 'BSIT', year: '3rd Year', status: 'paid' } // Set to paid so grades work
+        };
+
+        if (this.loginAlert) {
+            this.loginAlert.classList.add('hidden-alert');
+        }
+
+        if (password !== 'admin123') {
+            this.showError('Invalid password. Please try again.');
+            return;
+        }
+
+        // --- Teacher Verification ---
+        if (role === 'teacher') {
+            let matchedTeacher = null;
+
+            if (username === 't.janedoe') {
+                matchedTeacher = { username: 't.janedoe', fullname: 'Jane Doe', department: 'College of Computer Studies' };
+            } else {
+                matchedTeacher = dynamicTeachers.find(t => t.username === username);
+            }
+
+            if (matchedTeacher) {
+                localStorage.setItem('currentUser', JSON.stringify({
+                    role: 'teacher',
+                    username: matchedTeacher.username,
+                    fullname: matchedTeacher.fullname,
+                    department: matchedTeacher.department
+                }));
+                window.location.href = 'teacher-dashboard.html';
+            } else {
+                this.showError('Teacher account not found.');
+            }
+        } 
+        // --- Admin Verification ---
+        else if (role === 'admin') {
+            if (validAdmins.includes(username)) {
+                window.location.href = 'admin-dashboard.html';
+            } else {
+                this.showError('Admin account not found.');
+            }
+        } 
+        // --- Student Verification ---
+        else if (role === 'student') {
+            const matchedStudent = studentsDB[username];
+            
+            if (matchedStudent) {
+                // Save student session data
+                localStorage.setItem('currentUser', JSON.stringify({
+                    role: 'student',
+                    ...matchedStudent
+                }));
+                window.location.href = 'student-dashboard.html';
+            } else {
+                this.showError('Student account not found.');
+            }
+        }
+    }
+
+    showError(message) {
+        if (this.loginAlert) {
+            this.loginAlert.textContent = message;
+            this.loginAlert.classList.remove('hidden-alert');
+        }
+    }
 }
 
-/**
- * Application Bootstrap
- * Initializes all modules when the DOM is fully loaded.
- */
 document.addEventListener('DOMContentLoaded', () => {
     new Navigation('.mobile-menu-btn', 'mobileMenu');
     new LoginForm();

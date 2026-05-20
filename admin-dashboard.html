@@ -144,15 +144,15 @@
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td><span class="subject-code">2026-0450</span></td>
-                                        <td>Liam Carter</td>
+                                        <td><span class="subject-code">2026-001</span></td>
+                                        <td>John Doe</td>
                                         <td>BSIT</td>
                                         <td><span class="access-badge unlocked">Paid</span></td>
                                     </tr>
                                     <tr>
-                                        <td><span class="subject-code">2026-0451</span></td>
-                                        <td>Olivia Reyes</td>
-                                        <td>BSCS</td>
+                                        <td><span class="subject-code">2026-002</span></td>
+                                        <td>Maria Clara</td>
+                                        <td>BSIT</td>
                                         <td><span class="access-badge locked">Unpaid</span></td>
                                     </tr>
                                 </tbody>
@@ -240,12 +240,28 @@
             </div>
 
             <div id="teachers-view" class="view-section hidden">
+                <div class="panel-toolbar filter-bar">
+                    <div class="search-bar">
+                        <input type="text" class="search-input" placeholder="Search teachers...">
+                    </div>
+                    <button type="button" class="btn-add modal-trigger" data-modal-target="addTeacherModal">+ Add Teacher</button>
+                </div>
+
                 <div class="panel">
                     <div class="panel-header">
                         <h3 class="panel-title">Faculty Roster</h3>
                     </div>
                     <div class="panel-body">
                         <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Full Name</th>
+                                    <th>Email Address</th>
+                                    <th>Department</th>
+                                    <th class="text-right">Actions</th>
+                                </tr>
+                            </thead>
                             <tbody>
                                 <tr>
                                     <td><span class="subject-code">t.janedoe</span></td>
@@ -369,16 +385,20 @@
             <div class="form-row">
                 <div class="admin-form-group">
                     <label class="admin-label">Username</label>
-                    <input type="text" class="admin-input" placeholder="t.janedoe">
+                    <input type="text" id="teacher-username" class="admin-input" placeholder="t.janedoe">
                 </div>
                 <div class="admin-form-group">
                     <label class="admin-label">Full Name</label>
-                    <input type="text" class="admin-input" placeholder="Jane Doe">
+                    <input type="text" id="teacher-fullname" class="admin-input" placeholder="Jane Doe">
                 </div>
             </div>
             <div class="admin-form-group">
+                <label class="admin-label">Email Address</label>
+                <input type="email" id="teacher-email" class="admin-input" placeholder="jane.doe@lcc.edu">
+            </div>
+            <div class="admin-form-group">
                 <label class="admin-label">Department</label>
-                <input type="text" class="admin-input" placeholder="College of Computer Studies">
+                <input type="text" id="teacher-dept" class="admin-input" placeholder="College of Computer Studies">
             </div>
         </div>
         <div class="modal-footer">
@@ -457,39 +477,20 @@
                 <button type="button" class="btn-add modal-trigger" data-modal-target="assignNewSubjectModal">+ Assign Subject</button>
             </div>
 
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Code</th>
-                        <th>Subject Title</th>
-                        <th>Section</th>
-                        <th class="text-right">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><span class="subject-code">IT301</span></td>
-                        <td><strong>Web Development II</strong></td>
-                        <td>BSIT-3A</td>
-                        <td class="text-right">
-                            <div class="action-btns justify-end">
-                                <button class="btn-action btn-delete">Unassign</button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><span class="subject-code">IT302</span></td>
-                        <td><strong>Database Management Systems</strong></td>
-                        <td>BSIT-3A</td>
-                        <td class="text-right">
-                            <div class="action-btns justify-end">
-                                <button class="btn-action btn-delete">Unassign</button>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            
+            <div class="table-scroll-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Subject Title</th>
+                            <th>Section</th>
+                            <th class="text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
         </div>
         <div class="modal-footer">
             <button class="btn-cancel modal-close-btn">Close Panel</button>
