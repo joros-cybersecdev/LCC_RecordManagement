@@ -1,77 +1,103 @@
-/**
- * TeacherAccessController Class
- * Handles dynamic UI updates for grade access toggles
- */
-class TeacherAccessController {
+class TeacherDashboardController {
     constructor() {
-        // Core interactive elements
         this.unlockAllBtn = document.getElementById('btn-unlock-all');
         this.lockAllBtn = document.getElementById('btn-lock-all');
-        this.accessToggles = document.querySelectorAll('.access-toggle');
-
-        // Initialize if we are on a page that uses these elements
-        if (this.accessToggles.length > 0) {
-            this.initEvents();
-        }
+        
+        this.initEvents();
+        this.loadTeacherData();
     }
 
     initEvents() {
-        // Global Unlock/Lock Buttons
-        if (this.unlockAllBtn) {
-            this.unlockAllBtn.addEventListener('click', () => this.toggleAll(true));
-        }
+        if (this.unlockAllBtn) this.unlockAllBtn.addEventListener('click', () => this.toggleAllGrades('Unlocked'));
+        if (this.lockAllBtn) this.lockAllBtn.addEventListener('click', () => this.toggleAllGrades('Locked'));
+    }
 
-        if (this.lockAllBtn) {
-            this.lockAllBtn.addEventListener('click', () => this.toggleAll(false));
-        }
+    async loadTeacherData() {
+        // 1. Get Logged in Teacher
+        const { data: { user } } = await window.supabase.auth.getUser();
+        if (!user) return window.location.href = 'login.html';
 
-        // Individual switch listeners
-        this.accessToggles.forEach(toggle => {
-            toggle.addEventListener('change', (e) => this.handleToggleChange(e.target));
+        // 2. Get Sections assigned to this teacher
+        const { data: sections, error } = await window.supabase
+            .from('sections')
+            .select('id, section_name, subjects(code, title)')
+            .eq('faculty_id', user.id);
+
+        if (error || !sections.length) return console.log('No sections assigned.');
+
+        // 3. Load students for the first section by default
+        this.loadStudentsForSection(sections[0].id);
+    }
+
+    async loadStudentsForSection(sectionId) {
+        const { data: records, error } = await window.supabase
+            .from('records')
+            .select(`
+                id, grade, status, payment_status,
+                profiles ( full_name, school_id )
+            `)
+            .eq('section_id', sectionId);
+
+        if (error) return console.error(error);
+
+        this.renderGradeTable(records);
+    }
+
+    renderGradeTable(records) {
+        const tbody = document.querySelector('#grades-view .data-table tbody');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+        records.forEach((record, index) => {
+            const isLocked = record.status === 'Locked';
+            tbody.innerHTML += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td><span class="subject-code">${record.profiles.school_id}</span></td>
+                    <td>${record.profiles.full_name}</td>
+                    <td><span class="access-badge ${record.payment_status === 'Paid' ? 'unlocked' : 'locked'}">${record.payment_status}</span></td>
+                    <td>
+                        <input type="number" class="grade-input" id="grade-${record.id}" value="${record.grade || ''}" step="0.25" min="1.00" max="5.00" onblur="teacherApp.updateGrade('${record.id}', this.value)">
+                    </td>
+                    <td>
+                        <span class="access-status-label ${isLocked ? 'status-locked' : 'status-unlocked'}">${record.status}</span>
+                        <button style="margin-left: 10px; font-size: 0.7rem; padding: 2px 5px;" onclick="teacherApp.toggleSingleGrade('${record.id}', '${isLocked ? 'Unlocked' : 'Locked'}')">Toggle</button>
+                    </td>
+                </tr>
+            `;
         });
     }
 
-    /**
-     * Toggles all switches on the page to a specific boolean state
-     */
-    toggleAll(state) {
-        this.accessToggles.forEach(checkbox => {
-            checkbox.checked = state;
-            this.updateLabelStyle(checkbox);
-        });
+    // ==========================================
+    // SUPABASE UPDATES
+    // ==========================================
+
+    async updateGrade(recordId, newGrade) {
+        if (!newGrade) return;
+        const { error } = await window.supabase
+            .from('records')
+            .update({ grade: parseFloat(newGrade) })
+            .eq('id', recordId);
+
+        if (error) alert('Error saving grade: ' + error.message);
     }
 
-    /**
-     * Handles an individual toggle interaction
-     */
-    handleToggleChange(checkbox) {
-        this.updateLabelStyle(checkbox);
+    async toggleSingleGrade(recordId, newStatus) {
+        const { error } = await window.supabase
+            .from('records')
+            .update({ status: newStatus })
+            .eq('id', recordId);
+
+        if (!error) this.loadTeacherData(); // Refresh UI
     }
 
-    /**
-     * Finds the corresponding label for a toggle and dynamically updates text and CSS classes
-     */
-    updateLabelStyle(checkbox) {
-        // Look up the closest table row to isolate the target label
-        const row = checkbox.closest('tr');
-        if (!row) return;
-
-        const label = row.querySelector('.access-status-label');
-        if (label) {
-            if (checkbox.checked) {
-                label.textContent = 'Unlocked';
-                label.classList.remove('status-locked');
-                label.classList.add('status-unlocked');
-            } else {
-                label.textContent = 'Locked';
-                label.classList.remove('status-unlocked');
-                label.classList.add('status-locked');
-            }
-        }
+    async toggleAllGrades(newStatus) {
+        // In a real app, you would pass the section ID here to update all in a section.
+        alert(`Bulk update to ${newStatus} triggered.`);
     }
 }
 
-// Initialize when DOM is ready
+let teacherApp;
 document.addEventListener('DOMContentLoaded', () => {
-    new TeacherAccessController();
+    teacherApp = new TeacherDashboardController();
 });

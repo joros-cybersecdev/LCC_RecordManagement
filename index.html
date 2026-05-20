@@ -6,6 +6,15 @@
     <title>LCC Portal — La Consolacion College</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/lcc-style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        const SUPABASE_URL = 'https://ptsfqtyehangvzrinzag.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_e-wNRIRqYtvDQsuMApW54A__jsdBUEn';
+        // Create a global instance to be used by all your other JS files
+        window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    </script>
 </head>
 <body>
 

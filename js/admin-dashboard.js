@@ -1,29 +1,27 @@
-/**
- * AdminDashboardController Class
- * Handles OOP Modal Popups and Internal Routing
- */
 class AdminDashboardController {
     constructor() {
-        // Modal Elements
         this.modals = document.querySelectorAll('.modal-overlay');
         this.modalTriggers = document.querySelectorAll('.modal-trigger');
         this.closeButtons = document.querySelectorAll('.modal-close-btn');
-        
-        // Navigation / Routing Elements
         this.navTriggers = document.querySelectorAll('.nav-trigger');
-
+        
         this.initEvents();
-    }initEvents() {
-    // 1. Open Modals
+        
+        // Fetch LIVE data from Supabase
+        this.loadStudents();
+        this.loadTeachers();
+        this.loadSections();
+    }
+
+    initEvents() {
+        // UI Navigation & Modals
         this.modalTriggers.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
-                const targetId = btn.getAttribute('data-modal-target');
-                this.openModal(targetId);
+                this.openModal(btn.getAttribute('data-modal-target'));
             });
         });
 
-        // 2. Close Modals
         this.closeButtons.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -32,14 +30,6 @@ class AdminDashboardController {
             });
         });
 
-        // 3. Click outside to close
-        window.addEventListener('click', (e) => {
-            this.modals.forEach(overlay => {
-                if (e.target === overlay) this.closeModal(overlay);
-            });
-        });
-
-        // 4. Custom App Navigation (e.g., clicking "Manage Payments")
         this.navTriggers.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -48,108 +38,119 @@ class AdminDashboardController {
                 if (sidebarLink) sidebarLink.click();
             });
         });
+    }
 
-        // ... existing code ...
+    // ==========================================
+    // SUPABASE DATABASE FETCHING
+    // ==========================================
 
-    // Handle Delete Buttons
-    const deleteBtns = document.querySelectorAll('.btn-delete');
-    deleteBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            if(confirm("Are you sure you want to delete this record?")) {
-                // Logic to remove the row goes here
-                const row = e.target.closest('tr');
-                if (row) row.remove();
-            }
-        });
-    });
+    async loadStudents() {
+        const { data: students, error } = await window.supabase
+            .from('profiles')
+            .select('*')
+            .eq('role', 'student');
 
-    // ----------------------------------------------------
-    // NEW: Handle "Confirm Assignment" Button
-    // ----------------------------------------------------
-    const confirmAssignmentBtn = document.querySelector('#assignNewSubjectModal .btn-submit');
-    
-    if (confirmAssignmentBtn) {
-        confirmAssignmentBtn.addEventListener('click', (e) => {
-            e.preventDefault();
+        if (error) return console.error(error);
 
-            // 1. Get the modal and the dropdowns
-            const assignModal = document.getElementById('assignNewSubjectModal');
-            const selectInputs = assignModal.querySelectorAll('.admin-input');
-            const subjectSelect = selectInputs[0];
-            const sectionSelect = selectInputs[1];
-
-            const subjectValue = subjectSelect.value;
-            const sectionValue = sectionSelect.value;
-
-            // 2. Basic validation (make sure both are selected)
-            if (!subjectValue || !sectionValue) {
-                alert("Please select both a subject and a section.");
-                return;
-            }
-
-            // 3. Extract the Subject Code and Title (e.g. "IT303 - Systems Integration")
-            const splitSubject = subjectValue.split(' - ');
-            const subjectCode = splitSubject[0];
-            const subjectTitle = splitSubject[1] || subjectValue;
-
-            // 4. Find the target table inside the Manage Subjects Modal
-            const subjectsTableBody = document.querySelector('#manageSubjectsModal .data-table tbody');
-
-            if (subjectsTableBody) {
-                // 5. Create a new table row matching your existing HTML
-                const newRow = document.createElement('tr');
-                newRow.innerHTML = `
-                    <td><span class="subject-code">${subjectCode}</span></td>
-                    <td><strong>${subjectTitle}</strong></td>
-                    <td>${sectionValue}</td>
+        const tbody = document.querySelector('#students-view .data-table tbody');
+        if (!tbody) return;
+        
+        tbody.innerHTML = '';
+        students.forEach(student => {
+            tbody.innerHTML += `
+                <tr>
+                    <td><span class="subject-code">${student.school_id}</span></td>
+                    <td>${student.full_name}</td>
+                    <td>${student.program || 'N/A'}</td>
+                    <td><span class="access-badge unlocked">Active</span></td>
                     <td class="text-right">
                         <div class="action-btns justify-end">
-                            <button class="btn-action btn-delete">Unassign</button>
+                            <button class="btn-delete" onclick="adminApp.deleteProfile('${student.id}')">Delete</button>
                         </div>
                     </td>
-                `;
-
-                // 6. Append the new row to the table
-                subjectsTableBody.appendChild(newRow);
-
-                // 7. Make sure the new "Unassign" button works!
-                const newDeleteBtn = newRow.querySelector('.btn-delete');
-                newDeleteBtn.addEventListener('click', (event) => {
-                    if(confirm("Are you sure you want to unassign this subject?")) {
-                        event.target.closest('tr').remove();
-                    }
-                });
-
-                // 8. Reset the dropdowns and close the modal
-                subjectSelect.selectedIndex = 0;
-                sectionSelect.selectedIndex = 0;
-                this.closeModal(assignModal);
-            }
+                </tr>
+            `;
         });
     }
-    // ----------------------------------------------------
 
-} // <-- End of initEvents() method
+    async loadTeachers() {
+        const { data: teachers, error } = await window.supabase
+            .from('profiles')
+            .select('*')
+            .eq('role', 'faculty');
 
-openModal(modalId) {
-// ... existing code ...
+        if (error) return console.error(error);
 
-    // Handle Delete Buttons
-    const deleteBtns = document.querySelectorAll('.btn-delete');
-    deleteBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            if(confirm("Are you sure you want to delete this record?")) {
-                // Logic to remove the row goes here
-                const row = e.target.closest('tr');
-                if (row) row.remove();
-            }
+        const tbody = document.querySelector('#teachers-view .data-table tbody');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+        teachers.forEach(teacher => {
+            tbody.innerHTML += `
+                <tr>
+                    <td><span class="subject-code">${teacher.school_id}</span></td>
+                    <td>${teacher.full_name}</td>
+                    <td>${teacher.school_id}@lcc.edu</td>
+                    <td>Faculty Department</td>
+                    <td class="text-right">
+                        <div class="action-btns justify-end">
+                            <button class="btn-delete" onclick="adminApp.deleteProfile('${teacher.id}')">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
         });
-    })
-}
+    }
 
-  
+    async loadSections() {
+        const { data: sections, error } = await window.supabase
+            .from('sections')
+            .select('id, section_name, school_year, semester, subjects(title)');
 
-    
+        if (error) return console.error(error);
+
+        const tbody = document.querySelector('#sections-view .data-table tbody');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+        sections.forEach(sec => {
+            tbody.innerHTML += `
+                <tr>
+                    <td><span class="subject-code">${sec.section_name}</span></td>
+                    <td>${sec.subjects?.title || 'Unknown Subject'}</td>
+                    <td>${sec.school_year}</td>
+                    <td>${sec.semester}</td>
+                    <td class="text-right">
+                        <div class="action-btns justify-end">
+                            <button class="btn-delete" onclick="adminApp.deleteSection('${sec.id}')">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    // ==========================================
+    // SUPABASE DELETION
+    // ==========================================
+
+    async deleteProfile(id) {
+        if (!confirm('Delete this user permanently?')) return;
+        const { error } = await window.supabase.from('profiles').delete().eq('id', id);
+        if (error) alert(error.message);
+        else { this.loadStudents(); this.loadTeachers(); }
+    }
+
+    async deleteSection(id) {
+        if (!confirm('Delete this section?')) return;
+        const { error } = await window.supabase.from('sections').delete().eq('id', id);
+        if (error) alert(error.message);
+        else this.loadSections();
+    }
+
+    // ==========================================
+    // UI UTILITIES
+    // ==========================================
 
     openModal(modalId) {
         const modal = document.getElementById(modalId);
@@ -159,13 +160,9 @@ openModal(modalId) {
     closeModal(modalElement) {
         modalElement.classList.remove('open');
     }
-    
-    
 }
 
-// Initialize when the DOM loads
+let adminApp;
 document.addEventListener('DOMContentLoaded', () => {
-    new AdminDashboardController();
+    adminApp = new AdminDashboardController();
 });
-
-

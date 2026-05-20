@@ -1,30 +1,3 @@
-/**
- * Navigation Class
- * Handles mobile menu toggling for the main portal.
- */
-class Navigation {
-    constructor(buttonSelector, menuId) {
-        this.menuBtn = document.querySelector(buttonSelector);
-        this.mobileMenu = document.getElementById(menuId);
-
-        if (this.menuBtn && this.mobileMenu) {
-            this.initEvents();
-        }
-    }
-
-    initEvents() {
-        this.menuBtn.addEventListener('click', () => this.toggleMenu());
-    }
-
-    toggleMenu() {
-        this.mobileMenu.classList.toggle('open');
-    }
-}
-
-/**
- * LoginForm Class
- * Handles dynamic role selection and password visibility on the login page.
- */
 class LoginForm {
     constructor() {
         this.roleButtons = document.querySelectorAll('.role-btn');
@@ -33,44 +6,41 @@ class LoginForm {
         this.usernameInput = document.getElementById('username');
         this.passwordInput = document.getElementById('password');
         this.togglePassBtn = document.querySelector('.toggle-pass');
+        
+        this.loginForm = document.getElementById('loginForm');
+        this.loginAlert = document.getElementById('loginAlert');
 
-        // Only initialize if we are actually on the login page
         if (this.roleButtons.length > 0) {
             this.initEvents();
         }
     }
 
     initEvents() {
-        // Bind role buttons
         this.roleButtons.forEach(btn => {
-            btn.addEventListener('click', (e) => this.setRole(e.currentTarget));
+            btn.addEventListener('click', () => this.setRole(btn));
         });
 
-        // Bind password visibility toggle
-        if (this.togglePassBtn && this.passwordInput) {
+        if (this.loginForm) {
+            this.loginForm.addEventListener('submit', (e) => this.handleLogin(e));
+        }
+
+        if (this.togglePassBtn) {
             this.togglePassBtn.addEventListener('click', () => this.togglePassword());
         }
     }
 
     setRole(clickedBtn) {
-        // Update active class state
         this.roleButtons.forEach(b => b.classList.remove('active'));
         clickedBtn.classList.add('active');
-
-        // Get role from the HTML data attribute
         const role = clickedBtn.dataset.role;
         this.roleInput.value = role;
 
-        // Update UI dynamically
         if (role === 'student') {
             this.usernameLabel.textContent = 'Student ID';
-            this.usernameInput.placeholder = 'Enter your student ID';
-        } else if (role === 'teacher') {
+            this.usernameInput.placeholder = 'e.g. 26-0001';
+        } else {
             this.usernameLabel.textContent = 'Username';
-            this.usernameInput.placeholder = 'Enter your teacher username';
-        } else if (role === 'admin') {
-            this.usernameLabel.textContent = 'Username';
-            this.usernameInput.placeholder = 'Enter your admin username';
+            this.usernameInput.placeholder = `Enter your ${role} username`;
         }
     }
 
@@ -83,13 +53,56 @@ class LoginForm {
             this.togglePassBtn.textContent = 'Show';
         }
     }
+
+    async handleLogin(e) {
+        e.preventDefault();
+        
+        const username = this.usernameInput.value.trim();
+        const password = this.passwordInput.value;
+        const role = this.roleInput.value;
+
+        // Convert username to a mock email for Supabase Auth (e.g. 26-0001@lcc.edu)
+        const email = username.includes('@') ? username : `${username}@lcc.edu`;
+
+        try {
+            // 1. Authenticate with Supabase
+            const { data, error } = await window.supabase.auth.signInWithPassword({
+                email: email,
+                password: password
+            });
+
+            if (error) throw error;
+
+            // 2. Verify Role in Profiles Table
+            const { data: profile, error: profileError } = await window.supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', data.user.id)
+                .single();
+
+            if (profileError || profile.role !== role) {
+                await window.supabase.auth.signOut();
+                throw new Error("Unauthorized: Invalid role for this account.");
+            }
+
+            // 3. Redirect to correct dashboard
+            if (role === 'admin') window.location.href = 'admin-dashboard.html';
+            else if (role === 'faculty') window.location.href = 'teacher-dashboard.html';
+            else window.location.href = 'student-dashboard.html';
+
+        } catch (err) {
+            this.showError(err.message || 'Invalid credentials. Please try again.');
+        }
+    }
+
+    showError(message) {
+        if (this.loginAlert) {
+            this.loginAlert.textContent = message;
+            this.loginAlert.classList.remove('hidden-alert');
+        }
+    }
 }
 
-/**
- * Application Bootstrap
- * Initializes all modules when the DOM is fully loaded.
- */
 document.addEventListener('DOMContentLoaded', () => {
-    new Navigation('.mobile-menu-btn', 'mobileMenu');
     new LoginForm();
 });

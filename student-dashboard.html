@@ -9,6 +9,15 @@
     <link rel="stylesheet" href="css/lcc-style.css">
     <link rel="stylesheet" href="css/student-dashboard.css">
 </head>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        const SUPABASE_URL = 'https://ptsfqtyehangvzrinzag.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_e-wNRIRqYtvDQsuMApW54A__jsdBUEn';
+        // Create a global instance to be used by all your other JS files
+        window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    </script>
 <body class="dashboard-body">
 
 <div class="dashboard-wrapper">
@@ -128,17 +137,49 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td><span class="subject-code">IT301</span></td>
-                                        <td>Web Development II</td>
-                                        <td>3</td>
-                                    </tr>
-                                    <tr>
-                                        <td><span class="subject-code">IT302</span></td>
-                                        <td>Database Management Systems</td>
-                                        <td>3</td>
-                                    </tr>
-                                </tbody>
+                                <tr>
+                                    <td><span class="subject-code">IT301</span></td>
+                                    <td>Web Development II</td>
+                                    <td>3</td>
+                                    <td>Mr. Juan Dela Cruz</td>
+                                    <td>MWF 8:00 AM - 9:00 AM</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="subject-code">IT302</span></td>
+                                    <td>Database Management Systems</td>
+                                    <td>3</td>
+                                    <td>Ms. Maria Santos</td>
+                                    <td>MWF 9:00 AM - 10:00 AM</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="subject-code">IT303</span></td>
+                                    <td>Systems Integration and Architecture</td>
+                                    <td>3</td>
+                                    <td>Dr. Alan Turing</td>
+                                    <td>MWF 10:30 AM - 11:30 AM</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="subject-code">IT304</span></td>
+                                    <td>Mobile Application Development</td>
+                                    <td>3</td>
+                                    <td>Ms. Ada Lovelace</td>
+                                    <td>TTH 1:00 PM - 2:30 PM</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="subject-code">IT305</span></td>
+                                    <td>Information Assurance and Security</td>
+                                    <td>3</td>
+                                    <td>Dr. Grace Hopper</td>
+                                    <td>TTH 2:30 PM - 4:00 PM</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="subject-code">IT306</span></td>
+                                    <td>Networking and Administration</td>
+                                    <td>3</td>
+                                    <td>Prof. Tim Berners-Lee</td>
+                                    <td>Sat 9:00 AM - 12:00 PM</td>
+                                </tr>
+                            </tbody>
                             </table>
                         </div>
                     </div>
