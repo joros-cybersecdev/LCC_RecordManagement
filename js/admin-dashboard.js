@@ -220,6 +220,21 @@ class AdminDashboardController {
 
             tbody.appendChild(tr);
         });
+
+        // Handle Drop Student Functionality
+        const dropBtn = tr.querySelector('.btn-delete');
+        dropBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.showConfirm("Drop Student", `Are you sure you want to drop ${fullname}?`, () => {
+                let studentProfiles = JSON.parse(localStorage.getItem('studentProfiles')) || {};
+                delete studentProfiles[id];
+                localStorage.setItem('studentProfiles', JSON.stringify(studentProfiles));
+                tr.remove();
+                this.refreshStatCards();
+            });
+        });
+
+        tbody.appendChild(tr);
     }
 
     loadSavedTeachers() {
@@ -258,6 +273,94 @@ class AdminDashboardController {
                 facultyList = facultyList.filter(f => f.username !== teacher.username);
                 localStorage.setItem('facultyMembers', JSON.stringify(facultyList));
             }
+        }
+
+        // Populate DOM elements
+        document.getElementById('pc-avatar').textContent = initials;
+        document.getElementById('pc-name').textContent = val(student.fullname);
+        document.getElementById('pc-id').textContent = id;
+        document.getElementById('pc-program-sec').innerHTML = `${val(student.program)} &bull; ${val(student.section)}`;
+        
+        document.getElementById('pc-sex').textContent = val(student.sex);
+        document.getElementById('pc-birthday').textContent = val(student.birthday);
+        document.getElementById('pc-age').textContent = val(student.age);
+        document.getElementById('pc-contact').textContent = val(student.contact);
+        document.getElementById('pc-email').textContent = val(student.email);
+        document.getElementById('pc-address').textContent = val(student.address);
+        
+        document.getElementById('pc-father-name').textContent = val(student.fatherName);
+        document.getElementById('pc-father-contact').textContent = val(student.fatherContact);
+        document.getElementById('pc-mother-name').textContent = val(student.motherName);
+        document.getElementById('pc-mother-contact').textContent = val(student.motherContact);
+
+        // Show Overlay
+        const overlay = document.getElementById('studentProfileCardOverlay');
+        const closeBtn = overlay.querySelector('.profile-card-close');
+        
+        overlay.classList.add('active');
+
+        // Self-cleaning event listener functions
+        const closeCard = () => {
+            overlay.classList.remove('active');
+            closeBtn.removeEventListener('click', closeCard);
+            overlay.removeEventListener('click', clickOutside);
+        };
+
+        const clickOutside = (e) => {
+            if (e.target === overlay) closeCard();
+        };
+
+        // Attach listeners
+        closeBtn.addEventListener('click', closeCard);
+        overlay.addEventListener('click', clickOutside);
+    }
+
+    // ==========================================
+    // HELPER METHODS: TEACHERS & SUBJECTS
+    // ==========================================
+
+    prepareManageSubjectsModal(btn) {
+        const row = btn.closest('tr');
+        if (!row) return;
+        const username = row.querySelector('td:nth-child(1)').textContent.trim();
+        const fullname = row.querySelector('td:nth-child(2)').textContent.trim();
+        this.activeTeacherUsername = username;
+        const modalTitle = document.querySelector('#manageSubjectsModal .modal-title');
+        if (modalTitle) modalTitle.textContent = `Assigned Subjects - ${fullname}`;
+        this.renderSubjectsForAdmin();
+    }
+
+    renderSubjectsForAdmin() {
+        const tbody = document.querySelector('#manageSubjectsModal .data-table tbody');
+        if (!tbody) return;
+        tbody.innerHTML = ''; 
+
+        const allSubjects = JSON.parse(localStorage.getItem('teacherSubjects')) || [];
+        const teacherSubjects = allSubjects.filter(sub => sub.teacherUsername === this.activeTeacherUsername);
+
+        teacherSubjects.forEach(subject => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><span class="subject-code">${subject.code}</span></td>
+                <td><strong>${subject.title}</strong></td>
+                <td>${subject.section}</td>
+                <td class="text-right">
+                    <div class="action-btns justify-end">
+                        <button class="btn-action btn-delete">Unassign</button>
+                    </div>
+                </td>
+            `;
+            
+            const unassignBtn = tr.querySelector('.btn-delete');
+            unassignBtn.addEventListener('click', (e) => {
+                this.showConfirm("Unassign Subject", "Are you sure you want to unassign this subject?", () => {
+                    let stored = JSON.parse(localStorage.getItem('teacherSubjects')) || [];
+                    stored = stored.filter(s => !(s.teacherUsername === this.activeTeacherUsername && s.code === subject.code && s.section === subject.section));
+                    localStorage.setItem('teacherSubjects', JSON.stringify(stored));
+                    tr.remove();
+                });
+            });
+            tbody.appendChild(tr);
         });
 
         const modalTriggers = newRow.querySelectorAll('.modal-trigger');

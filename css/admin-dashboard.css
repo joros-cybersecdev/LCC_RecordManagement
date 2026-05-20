@@ -134,11 +134,13 @@
    ========================================= */
 
 /* Utilities */
+/* Utilities */
 .mt-auto { margin-top: auto; }
 .mt-lg { margin-top: 1.5rem; }
-.text-center { text-align: center; }
+.text-center { text-align: center !important; }
 .text-right { text-align: right; }
 .justify-end { justify-content: flex-end !important; }
+.justify-center { justify-content: center !important; } /* ADD THIS */
 
 /* Panel Text Styles */
 .panel-meta {

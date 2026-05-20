@@ -105,12 +105,7 @@ class LoginForm {
         const dynamicTeachers = JSON.parse(localStorage.getItem('facultyMembers')) || [];
         
         const validAdmins = ['admin'];
-
-        // Shared Student DB 
-        const studentsDB = {
-            '2026-001': { id: '2026-001', name: 'John Doe', section: 'BSIT-3A', program: 'BSIT', year: '3rd Year', status: 'paid' },
-            '2026-002': { id: '2026-002', name: 'Maria Clara', section: 'BSIT-3A', program: 'BSIT', year: '3rd Year', status: 'paid' } // Set to paid so grades work
-        };
+        const validStudents = ['2026-001', '2026-002'];
 
         if (this.loginAlert) {
             this.loginAlert.classList.add('hidden-alert');
@@ -121,10 +116,11 @@ class LoginForm {
             return;
         }
 
-        // --- Teacher Verification ---
+        // --- NEW: Dynamic Teacher Verification & Session Tracking ---
         if (role === 'teacher') {
             let matchedTeacher = null;
 
+            // Check if it's the default teacher OR a newly added dynamic teacher
             if (username === 't.janedoe') {
                 matchedTeacher = { username: 't.janedoe', fullname: 'Jane Doe', department: 'College of Computer Studies' };
             } else {
@@ -132,6 +128,7 @@ class LoginForm {
             }
 
             if (matchedTeacher) {
+                // Save the session data so the dashboard knows who logged in!
                 localStorage.setItem('currentUser', JSON.stringify({
                     role: 'teacher',
                     username: matchedTeacher.username,
@@ -143,7 +140,7 @@ class LoginForm {
                 this.showError('Teacher account not found.');
             }
         } 
-        // --- Admin Verification ---
+        // ------------------------------------------------------------
         else if (role === 'admin') {
             if (validAdmins.includes(username)) {
                 window.location.href = 'admin-dashboard.html';
@@ -151,16 +148,8 @@ class LoginForm {
                 this.showError('Admin account not found.');
             }
         } 
-        // --- Student Verification ---
         else if (role === 'student') {
-            const matchedStudent = studentsDB[username];
-            
-            if (matchedStudent) {
-                // Save student session data
-                localStorage.setItem('currentUser', JSON.stringify({
-                    role: 'student',
-                    ...matchedStudent
-                }));
+            if (validStudents.includes(username)) {
                 window.location.href = 'student-dashboard.html';
             } else {
                 this.showError('Student account not found.');
@@ -171,6 +160,7 @@ class LoginForm {
     showError(message) {
         if (this.loginAlert) {
             this.loginAlert.textContent = message;
+            // Make the block viewable by stripping the hiding class away
             this.loginAlert.classList.remove('hidden-alert');
         }
     }
