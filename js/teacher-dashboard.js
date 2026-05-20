@@ -123,11 +123,12 @@ class TeacherDashboardController {
      * Loads subjects from localStorage and generates HTML cards
      */
     loadAssignedSubjects() {
-        const container = document.querySelector('.subjects-cards');
-        if (!container) return; 
+        const cardsContainer = document.querySelector('.subjects-cards');
+        const dashboardTableBody = document.querySelector('#dashboard-view .data-table tbody');
 
-        // CRITICAL: Wipe out the hardcoded HTML dummy cards so data doesn't mix!
-        container.innerHTML = '';
+        // CRITICAL: Wipe out the hardcoded HTML dummy data so dynamic data doesn't mix!
+        if (cardsContainer) cardsContainer.innerHTML = '';
+        if (dashboardTableBody) dashboardTableBody.innerHTML = '';
 
         // Get the identity of the person currently logged in
         const sessionData = JSON.parse(localStorage.getItem('currentUser'));
@@ -139,43 +140,73 @@ class TeacherDashboardController {
         // FILTER: Keep only the subjects tagged with this specific teacher's username
         let savedSubjects = allSubjects.filter(sub => sub.teacherUsername === sessionData.username);
         
-        // Check if they have zero subjects assigned
+        // --- UPDATE STATS & BANNERS DYNAMICALLY ---
+        const subjectCountElem = document.querySelector('.stat-card.blue .stat-card-value');
+        if (subjectCountElem) {
+            subjectCountElem.textContent = savedSubjects.length;
+        }
+
+        const infoMetaElements = document.querySelectorAll('.info-meta');
+        if (infoMetaElements.length > 1) {
+            infoMetaElements[1].innerHTML = `Handling ${savedSubjects.length} subject(s) &bull; Pending students`;
+        }
+
+        // --- HANDLE EMPTY STATE ---
         if (savedSubjects.length === 0) {
-            container.innerHTML = `<div style="grid-column: 1 / -1; padding: 2rem; text-align: center; color: #64748b;">No subjects have been assigned to you yet.</div>`;
+            if (cardsContainer) cardsContainer.innerHTML = `<div style="grid-column: 1 / -1; padding: 2rem; text-align: center; color: #64748b;">No subjects have been assigned to you yet.</div>`;
+            if (dashboardTableBody) dashboardTableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #64748b;">No subjects assigned.</td></tr>`;
             return;
         }
 
-        // Render the filtered cards
+        // --- RENDER DYNAMIC DATA ---
         savedSubjects.forEach(subject => {
-            const cardHTML = `
-                <div class="subject-detail-card">
-                    <div class="sdc-header">
-                        <div class="sdc-code">${subject.code}</div>
-                        <span class="sdc-units">${subject.units} units</span>
-                    </div>
-                    <h3 class="sdc-name">${subject.title}</h3>
-                    <div class="sdc-meta">
-                        <div class="sdc-meta-item">
-                            <span class="sdc-meta-label">Section</span>
-                            <span class="sdc-meta-value">${subject.section}</span>
-                        </div>
-                        <div class="sdc-meta-item">
-                            <span class="sdc-meta-label">Program</span>
-                            <span class="sdc-meta-value">${subject.program}</span>
-                        </div>
-                        <div class="sdc-meta-item">
-                            <span class="sdc-meta-label">Year Level</span>
-                            <span class="sdc-meta-value">${subject.year}</span>
-                        </div>
-                        <div class="sdc-meta-item">
-                            <span class="sdc-meta-label">Students</span>
-                            <span class="sdc-meta-value">Pending</span>
-                        </div>
-                    </div>
-                </div>
-            `;
             
-            container.insertAdjacentHTML('beforeend', cardHTML);
+            // 1. Render the Card for the "My Subjects" Tab
+            if (cardsContainer) {
+                const cardHTML = `
+                    <div class="subject-detail-card">
+                        <div class="sdc-header">
+                            <div class="sdc-code">${subject.code}</div>
+                            <span class="sdc-units">${subject.units} units</span>
+                        </div>
+                        <h3 class="sdc-name">${subject.title}</h3>
+                        <div class="sdc-meta">
+                            <div class="sdc-meta-item">
+                                <span class="sdc-meta-label">Section</span>
+                                <span class="sdc-meta-value">${subject.section}</span>
+                            </div>
+                            <div class="sdc-meta-item">
+                                <span class="sdc-meta-label">Program</span>
+                                <span class="sdc-meta-value">${subject.program}</span>
+                            </div>
+                            <div class="sdc-meta-item">
+                                <span class="sdc-meta-label">Year Level</span>
+                                <span class="sdc-meta-value">${subject.year}</span>
+                            </div>
+                            <div class="sdc-meta-item">
+                                <span class="sdc-meta-label">Students</span>
+                                <span class="sdc-meta-value">Pending</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                cardsContainer.insertAdjacentHTML('beforeend', cardHTML);
+            }
+
+            // 2. Render the Table Row for the main "Dashboard" Tab
+            if (dashboardTableBody) {
+                const rowHTML = `
+                    <tr>
+                        <td><span class="subject-code">${subject.code}</span></td>
+                        <td>${subject.title}</td>
+                        <td>${subject.units}</td>
+                        <td>${subject.section}</td>
+                        <td>${subject.program}</td>
+                        <td>2025-2026</td>
+                    </tr>
+                `;
+                dashboardTableBody.insertAdjacentHTML('beforeend', rowHTML);
+            }
         });
     }
 
