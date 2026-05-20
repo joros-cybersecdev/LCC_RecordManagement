@@ -1,24 +1,33 @@
 /**
  * AdminDashboardController Class
- * Handles OOP Modal Popups and Internal Routing
+ * Handles OOP Modal Popups, Internal Routing, and LocalStorage Persistence
  */
 class AdminDashboardController {
     constructor() {
-        // Modal Elements
         this.modals = document.querySelectorAll('.modal-overlay');
         this.modalTriggers = document.querySelectorAll('.modal-trigger');
         this.closeButtons = document.querySelectorAll('.modal-close-btn');
-        
-        // Navigation / Routing Elements
         this.navTriggers = document.querySelectorAll('.nav-trigger');
+        
+        // NEW: Tracks which teacher's subjects we are currently editing
+        this.activeTeacherUsername = null;
 
         this.initEvents();
-    }initEvents() {
-    // 1. Open Modals
+        this.loadSavedTeachers();
+    }
+
+    initEvents() {
+        // 1. Open Modals
         this.modalTriggers.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
                 const targetId = btn.getAttribute('data-modal-target');
+                
+                // NEW: Intercept the Subjects modal to set the active teacher
+                if (targetId === 'manageSubjectsModal') {
+                    this.prepareManageSubjectsModal(btn);
+                }
+                
                 this.openModal(targetId);
             });
         });
@@ -39,7 +48,7 @@ class AdminDashboardController {
             });
         });
 
-        // 4. Custom App Navigation (e.g., clicking "Manage Payments")
+        // 4. Custom App Navigation
         this.navTriggers.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -49,107 +58,225 @@ class AdminDashboardController {
             });
         });
 
-        // ... existing code ...
-
-    // Handle Delete Buttons
-    const deleteBtns = document.querySelectorAll('.btn-delete');
-    deleteBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            if(confirm("Are you sure you want to delete this record?")) {
-                // Logic to remove the row goes here
-                const row = e.target.closest('tr');
-                if (row) row.remove();
-            }
+        // Handle Hardcoded Delete Buttons
+        const deleteBtns = document.querySelectorAll('.btn-delete');
+        deleteBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if(confirm("Are you sure you want to delete this record?")) {
+                    const row = e.target.closest('tr');
+                    if (row) row.remove();
+                }
+            });
         });
-    });
 
-    // ----------------------------------------------------
-    // NEW: Handle "Confirm Assignment" Button
-    // ----------------------------------------------------
-    const confirmAssignmentBtn = document.querySelector('#assignNewSubjectModal .btn-submit');
-    
-    if (confirmAssignmentBtn) {
-        confirmAssignmentBtn.addEventListener('click', (e) => {
-            e.preventDefault();
+        // Handle "Save Teacher" Form Submission
+        const saveTeacherBtn = document.querySelector('#addTeacherModal .btn-submit');
+        if (saveTeacherBtn) {
+            saveTeacherBtn.addEventListener('click', (e) => {
+                e.preventDefault();
 
-            // 1. Get the modal and the dropdowns
-            const assignModal = document.getElementById('assignNewSubjectModal');
-            const selectInputs = assignModal.querySelectorAll('.admin-input');
-            const subjectSelect = selectInputs[0];
-            const sectionSelect = selectInputs[1];
+                const teacherModal = document.getElementById('addTeacherModal');
+                const usernameInput = document.getElementById('teacher-username');
+                const fullnameInput = document.getElementById('teacher-fullname');
+                const emailInput = document.getElementById('teacher-email');
+                const deptInput = document.getElementById('teacher-dept');
 
-            const subjectValue = subjectSelect.value;
-            const sectionValue = sectionSelect.value;
+                const username = usernameInput.value.trim();
+                const fullname = fullnameInput.value.trim();
+                const email = emailInput.value.trim();
+                const department = deptInput.value.trim();
 
-            // 2. Basic validation (make sure both are selected)
-            if (!subjectValue || !sectionValue) {
-                alert("Please select both a subject and a section.");
-                return;
-            }
+                if (!username || !fullname || !email || !department) {
+                    alert("Please fill out all the teacher details fields.");
+                    return;
+                }
 
-            // 3. Extract the Subject Code and Title (e.g. "IT303 - Systems Integration")
-            const splitSubject = subjectValue.split(' - ');
-            const subjectCode = splitSubject[0];
-            const subjectTitle = splitSubject[1] || subjectValue;
+                const newTeacher = { username, fullname, email, department };
 
-            // 4. Find the target table inside the Manage Subjects Modal
-            const subjectsTableBody = document.querySelector('#manageSubjectsModal .data-table tbody');
+                let facultyList = JSON.parse(localStorage.getItem('facultyMembers')) || [];
+                facultyList.push(newTeacher);
+                localStorage.setItem('facultyMembers', JSON.stringify(facultyList));
 
-            if (subjectsTableBody) {
-                // 5. Create a new table row matching your existing HTML
-                const newRow = document.createElement('tr');
-                newRow.innerHTML = `
-                    <td><span class="subject-code">${subjectCode}</span></td>
-                    <td><strong>${subjectTitle}</strong></td>
-                    <td>${sectionValue}</td>
-                    <td class="text-right">
-                        <div class="action-btns justify-end">
-                            <button class="btn-action btn-delete">Unassign</button>
-                        </div>
-                    </td>
-                `;
+                this.appendTeacherRow(newTeacher);
 
-                // 6. Append the new row to the table
-                subjectsTableBody.appendChild(newRow);
+                usernameInput.value = '';
+                fullnameInput.value = '';
+                emailInput.value = '';
+                deptInput.value = '';
 
-                // 7. Make sure the new "Unassign" button works!
-                const newDeleteBtn = newRow.querySelector('.btn-delete');
-                newDeleteBtn.addEventListener('click', (event) => {
-                    if(confirm("Are you sure you want to unassign this subject?")) {
-                        event.target.closest('tr').remove();
-                    }
-                });
+                this.closeModal(teacherModal);
+            });
+        }
 
-                // 8. Reset the dropdowns and close the modal
+        // Handle "Confirm Assignment" Button
+        const confirmAssignmentBtn = document.querySelector('#assignNewSubjectModal .btn-submit');
+        if (confirmAssignmentBtn) {
+            confirmAssignmentBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+
+                const assignModal = document.getElementById('assignNewSubjectModal');
+                const selectInputs = assignModal.querySelectorAll('.admin-input');
+                const subjectSelect = selectInputs[0];
+                const sectionSelect = selectInputs[1];
+
+                const subjectValue = subjectSelect.value;
+                const sectionValue = sectionSelect.value;
+
+                if (!subjectValue || !sectionValue) {
+                    alert("Please select both a subject and a section.");
+                    return;
+                }
+
+                const splitSubject = subjectValue.split(' - ');
+                const subjectCode = splitSubject[0];
+                const subjectTitle = splitSubject[1] || subjectValue;
+                const programCode = sectionValue.split('-')[0] || "N/A";
+                const yearLevel = (sectionValue.match(/\d/) ? sectionValue.match(/\d/)[0] + "rd Year" : "N/A");
+
+                const newSubjectData = {
+                    teacherUsername: this.activeTeacherUsername, // CRITICAL FIX: Tag the subject to the teacher!
+                    code: subjectCode,
+                    title: subjectTitle,
+                    section: sectionValue,
+                    program: programCode,
+                    year: yearLevel,
+                    units: "3"
+                };
+
+                let savedSubjects = JSON.parse(localStorage.getItem('teacherSubjects')) || [];
+                savedSubjects.push(newSubjectData);
+                localStorage.setItem('teacherSubjects', JSON.stringify(savedSubjects));
+
+                // Re-render the subjects table directly from memory
+                this.renderSubjectsForAdmin();
+
                 subjectSelect.selectedIndex = 0;
                 sectionSelect.selectedIndex = 0;
                 this.closeModal(assignModal);
-            }
+            });
+        }
+    }
+
+    /**
+     * NEW: Sets up the Manage Subjects modal for the specific teacher clicked
+     */
+    prepareManageSubjectsModal(btn) {
+        const row = btn.closest('tr');
+        if (!row) return;
+
+        // Extract the username and fullname from the HTML table row
+        const username = row.querySelector('td:nth-child(1)').textContent.trim();
+        const fullname = row.querySelector('td:nth-child(2)').textContent.trim();
+
+        // Save it to the class so the "Confirm Assignment" button knows who to give the subject to
+        this.activeTeacherUsername = username;
+        
+        // Update the Modal Title dynamically
+        const modalTitle = document.querySelector('#manageSubjectsModal .modal-title');
+        if (modalTitle) modalTitle.textContent = `Assigned Subjects - ${fullname}`;
+
+        this.renderSubjectsForAdmin();
+    }
+
+    /**
+     * NEW: Clears the modal table and renders ONLY the active teacher's subjects
+     */
+    renderSubjectsForAdmin() {
+        const tbody = document.querySelector('#manageSubjectsModal .data-table tbody');
+        if (!tbody) return;
+        
+        // Wipe the hardcoded HTML rows out
+        tbody.innerHTML = ''; 
+
+        const allSubjects = JSON.parse(localStorage.getItem('teacherSubjects')) || [];
+        
+        // Filter out everyone else's subjects
+        const teacherSubjects = allSubjects.filter(sub => sub.teacherUsername === this.activeTeacherUsername);
+
+        teacherSubjects.forEach(subject => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><span class="subject-code">${subject.code}</span></td>
+                <td><strong>${subject.title}</strong></td>
+                <td>${subject.section}</td>
+                <td class="text-right">
+                    <div class="action-btns justify-end">
+                        <button class="btn-action btn-delete">Unassign</button>
+                    </div>
+                </td>
+            `;
+            
+            // Allow unassigning
+            const unassignBtn = tr.querySelector('.btn-delete');
+            unassignBtn.addEventListener('click', (e) => {
+                if(confirm("Are you sure you want to unassign this subject?")) {
+                    let stored = JSON.parse(localStorage.getItem('teacherSubjects')) || [];
+                    // Remove this exact subject for this exact teacher from the database
+                    stored = stored.filter(s => !(s.teacherUsername === this.activeTeacherUsername && s.code === subject.code && s.section === subject.section));
+                    localStorage.setItem('teacherSubjects', JSON.stringify(stored));
+                    tr.remove();
+                }
+            });
+
+            tbody.appendChild(tr);
         });
     }
-    // ----------------------------------------------------
 
-} // <-- End of initEvents() method
+    loadSavedTeachers() {
+        const facultyList = JSON.parse(localStorage.getItem('facultyMembers')) || [];
+        facultyList.forEach(teacher => {
+            this.appendTeacherRow(teacher);
+        });
+    }
 
-openModal(modalId) {
-// ... existing code ...
+    appendTeacherRow(teacher) {
+        const teachersTableBody = document.querySelector('#teachers-view .data-table tbody');
+        if (!teachersTableBody) return;
 
-    // Handle Delete Buttons
-    const deleteBtns = document.querySelectorAll('.btn-delete');
-    deleteBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            if(confirm("Are you sure you want to delete this record?")) {
-                // Logic to remove the row goes here
-                const row = e.target.closest('tr');
-                if (row) row.remove();
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = `
+            <td><span class="subject-code">${teacher.username}</span></td>
+            <td>${teacher.fullname}</td>
+            <td>${teacher.email}</td>
+            <td>${teacher.department}</td>
+            <td class="text-right">
+                <div class="action-btns justify-end">
+                    <button class="btn-action btn-access modal-trigger" data-modal-target="manageSubjectsModal" title="Manage Assigned Subjects">
+                        &#128218; Subjects
+                    </button>
+                    <button class="btn-action btn-edit modal-trigger" data-modal-target="editTeacherModal">Edit</button>
+                    <button class="btn-action btn-delete">Delete</button>
+                </div>
+            </td>
+        `;
+
+        const deleteBtn = newRow.querySelector('.btn-delete');
+        deleteBtn.addEventListener('click', () => {
+            if (confirm(`Are you sure you want to delete ${teacher.fullname}?`)) {
+                newRow.remove();
+                let facultyList = JSON.parse(localStorage.getItem('facultyMembers')) || [];
+                facultyList = facultyList.filter(f => f.username !== teacher.username);
+                localStorage.setItem('facultyMembers', JSON.stringify(facultyList));
             }
         });
-    })
-}
 
-  
+        const modalTriggers = newRow.querySelectorAll('.modal-trigger');
+        modalTriggers.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = btn.getAttribute('data-modal-target');
+                
+                // NEW: Intercept for dynamic rows too
+                if (targetId === 'manageSubjectsModal') {
+                    this.prepareManageSubjectsModal(btn);
+                }
 
-    
+                this.openModal(targetId);
+            });
+        });
+
+        teachersTableBody.appendChild(newRow);
+    }
 
     openModal(modalId) {
         const modal = document.getElementById(modalId);
@@ -159,13 +286,8 @@ openModal(modalId) {
     closeModal(modalElement) {
         modalElement.classList.remove('open');
     }
-    
-    
 }
 
-// Initialize when the DOM loads
 document.addEventListener('DOMContentLoaded', () => {
     new AdminDashboardController();
 });
-
-
