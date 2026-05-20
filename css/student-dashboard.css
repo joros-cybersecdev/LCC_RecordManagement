@@ -1130,3 +1130,162 @@ input:checked + .toggle-slider:before { transform: translateX(19px); }
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* =========================================================
+   MASTER RESPONSIVE BREAKPOINTS (Dashboards & Modals)
+   ========================================================= */
+
+/* --- TABLETS & SMALL DESKTOPS (Max 1100px) --- */
+@media (max-width: 1100px) {
+    /* Collapse 4-column stat cards to 2-column */
+    .cards-grid { 
+        grid-template-columns: repeat(2, 1fr); 
+    }
+    
+    /* Collapse side-by-side bottom panels */
+    .bottom-grid { 
+        grid-template-columns: 1fr; 
+    }
+}
+
+/* --- LARGE MOBILE & TABLET PORTRAIT (Max 820px) --- */
+@media (max-width: 820px) {
+    /* 1. Sidebar & Header Adjustments */
+    .sidebar { 
+        transform: translateX(-100%); 
+        width: 260px;
+    }
+    .sidebar.sidebar-open { 
+        transform: translateX(0); 
+        box-shadow: 4px 0 25px rgba(0,0,0,0.4); 
+    }
+    .main-content { 
+        margin-left: 0; 
+    }
+    .sidebar-toggle { 
+        display: flex; 
+    }
+    .top-header { 
+        padding: 0 1.25rem; 
+    }
+    .header-user-info { 
+        display: none; /* Hide text, keep avatar */ 
+    }
+
+    /* 2. Banners & Filters */
+    .info-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.25rem;
+    }
+    .info-right {
+        width: 100%;
+        display: flex;
+        justify-content: flex-start;
+    }
+    .filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .filter-bar .search-bar {
+        width: 100%;
+    }
+    .filter-bar .search-input {
+        max-width: 100%;
+    }
+    
+    /* 3. Button Groups */
+    .filter-bar .btn-save, 
+    .filter-bar .btn-add,
+    .filter-bar .btn-lock {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* 4. Table Scroll Safety */
+    .panel-body {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .data-table {
+        min-width: 700px; /* Forces horizontal scroll instead of squishing data */
+    }
+}
+
+/* --- SMALL MOBILE PHONES (Max 580px) --- */
+@media (max-width: 580px) {
+    /* 1. Content Spacing */
+    .dashboard-content { 
+        padding: 1.25rem 1rem; 
+    }
+    
+    /* 2. Stat Cards to Single Column */
+    .cards-grid { 
+        grid-template-columns: 1fr; 
+    }
+
+    /* 3. Modal Overrides */
+    .modal {
+        max-height: 90vh;
+        border-radius: 12px;
+    }
+    .modal-body {
+        padding: 1.25rem 1rem;
+    }
+    
+    /* Force form rows to stack vertically on mobile */
+    .form-row {
+        grid-template-columns: 1fr !important;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+    }
+    .admin-form-group {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+
+    /* Stack Modal Buttons */
+    .modal-footer {
+        flex-direction: column-reverse;
+        padding: 1rem;
+    }
+    .modal-footer .btn-cancel,
+    .modal-footer .btn-submit {
+        width: 100%;
+        text-align: center;
+    }
+
+    /* 4. Student Profile Card Overlay */
+    .profile-card {
+        max-width: 100%;
+        border-radius: 12px;
+    }
+    .pc-parents-grid {
+        grid-template-columns: 1fr;
+    }
+    .profile-card-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+    .pc-value {
+        text-align: left;
+    }
+}
+
+/* --- EXTRA SMALL SCREENS (Max 380px) --- */
+@media (max-width: 380px) {
+    .page-title {
+        font-size: 0.95rem;
+    }
+    .info-name {
+        font-size: 0.9rem;
+    }
+    .stat-card-value {
+        font-size: 1.75rem;
+    }
+    .notice-bar {
+        flex-direction: column;
+    }
+}

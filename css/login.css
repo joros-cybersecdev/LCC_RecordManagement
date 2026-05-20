@@ -11,6 +11,8 @@
     overflow-x: hidden;
 }
 
+.hidden-alert { display: none; }
+
 .login-accent-line {
     width: 80px;
     height: 4px;

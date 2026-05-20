@@ -13,10 +13,18 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        const SUPABASE_URL = 'https://ptsfqtyehangvzrinzag.supabase.co';
+        const SUPABASE_URL     = 'https://ptsfqtyehangvzrinzag.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_e-wNRIRqYtvDQsuMApW54A__jsdBUEn';
-        // Create a global instance to be used by all your other JS files
-        window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // ⚠️ SERVICE ROLE KEY — paste from Supabase → Settings → API → service_role key.
+        // This is ONLY safe here because this page is the admin-only dashboard.
+        // It lets us create auth users without sending any confirmation email (no rate limit).
+        const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0c2ZxdHllaGFuZ3Z6cmluemFnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTI5MDU3OSwiZXhwIjoyMDk0ODY2NTc5fQ.1gMyE19fC-rFSIVazEj8LGQK_YWNIhu9ME3Nn6eH_eg';
+
+        window.supabase      = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        window.supabaseAdmin = supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
+            auth: { autoRefreshToken: false, persistSession: false }
+        });
     </script>
 </head>
 <body class="dashboard-body">
@@ -28,7 +36,7 @@
             <div class="sidebar-brand-logo">LCC</div>
             <div class="sidebar-brand-text">
                 <span class="sidebar-brand-name">LCC Portal</span>
-                <span class="sidebar-brand-sub">Admin Portal</span>
+                <span class="sidebar-brand-sub">Registar Portal</span>
             </div>
         </div>
 
@@ -218,25 +226,13 @@
                             <thead>
                                 <tr>
                                     <th>Section Name</th>
-                                    <th>Program</th>
-                                    <th>Year Level</th>
-                                    <th>Term</th>
+                                    <th>Subject</th>
+                                    <th>School Year</th>
+                                    <th>Semester / Term</th>
                                     <th></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td><span class="subject-code">BSIT-3A</span></td>
-                                    <td>BSIT</td>
-                                    <td>3rd Year</td>
-                                    <td>2025-2026 &bull; 2nd Sem</td>
-                                    <td class="text-right">
-                                        <div class="action-btns justify-end">
-                                            <button class="btn-edit modal-trigger" data-modal-target="editSectionModal">Edit</button>
-                                            <button class="btn-action btn-delete">Delete</button>
-                                        </div>
-                                    </td>
-                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -264,8 +260,8 @@
                 </div>
             </div>
             <div class="admin-form-group">
-                <label class="admin-label">Email Address</label>
-                <input type="email" id="edit-teacher-email" class="admin-input">
+                <label class="admin-label">Email Address (optional)</label>
+                <input type="text" id="edit-teacher-email" class="admin-input">
             </div>
             <div class="admin-form-group">
                 <label class="admin-label">Department</label>
@@ -333,9 +329,9 @@
             <h3 class="modal-title">Enroll New Student</h3>
             <button class="modal-close modal-close-btn">&times;</button>
         </div>
-        <div class="modal-body table-scroll-wrapper" style="max-height: 65vh; padding: 1.5rem; overflow-x: hidden;">
-            
-            <h4 class="admin-label" style="color: var(--blue-600); font-size: 0.9rem; margin-top: 0;">Personal Details</h4>
+        <div class="modal-body modal-scrollable">
+
+            <h4 class="modal-section-heading">&#128100; Personal Details</h4>
             <div class="form-row">
                 <div class="admin-form-group">
                     <label class="admin-label">Student ID *</label>
@@ -375,12 +371,12 @@
                     <input type="text" id="add-student-contact" class="admin-input" placeholder="09xxxxxxxxx">
                 </div>
                 <div class="admin-form-group">
-                    <label class="admin-label">Email Address</label>
-                    <input type="email" id="add-student-email" class="admin-input" placeholder="student@lcc.edu">
+                    <label class="admin-label">Email Address (optional)</label>
+                    <input type="text" id="add-student-email" class="admin-input" placeholder="student@gmail.com (optional)">
                 </div>
             </div>
 
-            <h4 class="admin-label" style="color: var(--blue-600); font-size: 0.9rem; margin-top: 1.5rem;">Academic Profile</h4>
+            <h4 class="modal-section-heading">🎓 Academic Profile</h4>
             <div class="form-row">
                 <div class="admin-form-group">
                     <label class="admin-label">Program</label>
@@ -398,7 +394,7 @@
                 </div>
             </div>
 
-            <h4 class="admin-label" style="color: var(--blue-600); font-size: 0.9rem; margin-top: 1.5rem;">Parents' Information</h4>
+            <h4 class="modal-section-heading">👨‍👩‍👧 Parents' Information</h4>
             <div class="form-row">
                 <div class="admin-form-group">
                     <label class="admin-label">Father's Name</label>
@@ -445,12 +441,18 @@
                 </div>
             </div>
             <div class="admin-form-group">
-                <label class="admin-label">Email Address</label>
-                <input type="email" id="teacher-email" class="admin-input" placeholder="jane.doe@lcc.edu">
+                <label class="admin-label">Email Address (optional)</label>
+                <input type="text" id="teacher-email" class="admin-input" placeholder="jane.doe@gmail.com (optional)">
             </div>
             <div class="admin-form-group">
                 <label class="admin-label">Department</label>
                 <input type="text" id="teacher-dept" class="admin-input" placeholder="College of Computer Studies">
+            </div>
+            <div class="admin-form-group">
+                <label class="admin-label">Assign to Section</label>
+                <select id="teacher-section" class="admin-input">
+                    <option value="">— No section yet —</option>
+                </select>
             </div>
         </div>
         <div class="modal-footer">
@@ -513,9 +515,9 @@
             <h3 class="modal-title">Edit Student Details</h3>
             <button class="modal-close modal-close-btn">&times;</button>
         </div>
-        <div class="modal-body table-scroll-wrapper" style="max-height: 65vh; padding: 1.5rem; overflow-x: hidden;">
+        <div class="modal-body modal-scrollable">
             
-            <h4 class="admin-label" style="color: var(--blue-600); font-size: 0.9rem; margin-top: 0;">Personal Details</h4>
+            <h4 class="modal-section-heading">👤 Personal Details</h4>
             <div class="form-row">
                 <div class="admin-form-group">
                     <label class="admin-label">Student ID (Read-only)</label>
@@ -555,12 +557,12 @@
                     <input type="text" id="edit-student-contact" class="admin-input">
                 </div>
                 <div class="admin-form-group">
-                    <label class="admin-label">Email Address</label>
-                    <input type="email" id="edit-student-email" class="admin-input">
+                    <label class="admin-label">Email Address (optional)</label>
+                    <input type="text" id="edit-student-email" class="admin-input">
                 </div>
             </div>
 
-            <h4 class="admin-label" style="color: var(--blue-600); font-size: 0.9rem; margin-top: 1.5rem;">Academic Profile</h4>
+            <h4 class="modal-section-heading">🎓 Academic Profile</h4>
             <div class="form-row">
                 <div class="admin-form-group">
                     <label class="admin-label">Program</label>
@@ -578,7 +580,7 @@
                 </div>
             </div>
 
-            <h4 class="admin-label" style="color: var(--blue-600); font-size: 0.9rem; margin-top: 1.5rem;">Parents' Information</h4>
+            <h4 class="modal-section-heading">👨‍👩‍👧 Parents' Information</h4>
             <div class="form-row">
                 <div class="admin-form-group">
                     <label class="admin-label">Father's Name</label>
@@ -607,7 +609,7 @@
     </div>
 </div>
 
-<div class="modal-overlay" id="manageSubjectsModal" class="panel-toolbar filter-bar filter-bar-transparent" class="modal modal-lg">
+<div class="modal-overlay" id="manageSubjectsModal">
     <div class="modal" style="max-width: 650px;"> 
         <div class="modal-header">
             <h3 class="modal-title">Assigned Subjects - Jane Doe</h3>

@@ -1,24 +1,518 @@
 class AdminDashboardController {
     constructor() {
-        this.modals = document.querySelectorAll('.modal-overlay');
+        this.modals        = document.querySelectorAll('.modal-overlay');
         this.modalTriggers = document.querySelectorAll('.modal-trigger');
-        this.closeButtons = document.querySelectorAll('.modal-close-btn');
-        this.navTriggers = document.querySelectorAll('.nav-trigger');
-        
+        this.closeButtons  = document.querySelectorAll('.modal-close-btn');
+        this.navTriggers   = document.querySelectorAll('.nav-trigger');
+
         this.initEvents();
-        
-        // Fetch LIVE data from Supabase
-        this.loadStudents();
-        this.loadTeachers();
-        this.loadSections();
+        this.initFormSubmissions();
+        this.initializeApp();
     }
 
+    async initializeApp() {
+        const isValid = await this.validateAdminAccess();
+        if (isValid) {
+            this.loadStudents();
+            this.loadTeachers();
+            this.loadSections();
+            this.loadDashboardStats();
+        }
+    }
+
+    async validateAdminAccess() {
+        const localSession = JSON.parse(localStorage.getItem('lcc_user'));
+    
+        if (!localSession || localSession.role !== 'admin') {
+            window.location.href = 'login.html';
+            return false;
+        }
+        
+        const { data: profile } = await window.supabase
+            .from('profiles')
+            .select('role, full_name')
+            .eq('id', localSession.id)
+            .single();
+        if (!profile || profile.role !== 'admin') {
+            alert('Unauthorized access.');
+            window.location.href = 'login.html';
+            return false;
+        }
+        // Show admin name in sidebar/header if available
+        if (profile.full_name) {
+            document.querySelectorAll('.sidebar-user-name, .header-user-name, .info-name').forEach(el => {
+                el.textContent = profile.full_name;
+            });
+        }
+        return true;
+    }
+
+    // ==========================================
+    // FORM SUBMISSION WIRING
+    // ==========================================
+
+    initFormSubmissions() {
+        // 1. ENROLL STUDENT
+        const btnSaveStudent = document.getElementById('btn-save-student');
+        if (btnSaveStudent) {
+            btnSaveStudent.addEventListener('click', () => this.handleEnrollStudent());
+        }
+
+        // 2. ADD TEACHER — target the button inside addTeacherModal specifically
+        const addTeacherModal = document.getElementById('addTeacherModal');
+        if (addTeacherModal) {
+            const btnSaveTeacher = addTeacherModal.querySelector('.btn-submit');
+            if (btnSaveTeacher) {
+                btnSaveTeacher.addEventListener('click', () => this.handleAddTeacher());
+            }
+        }
+
+        // 3. ADD SECTION
+        const addSectionModal = document.getElementById('addSectionModal');
+        if (addSectionModal) {
+            const btnSaveSection = addSectionModal.querySelector('.btn-submit');
+            if (btnSaveSection) {
+                btnSaveSection.addEventListener('click', () => this.handleAddSection());
+            }
+        }
+
+        // 4. UPDATE STUDENT
+        const btnUpdateStudent = document.getElementById('btn-update-student');
+        if (btnUpdateStudent) {
+            btnUpdateStudent.addEventListener('click', () => this.handleUpdateStudent());
+        }
+    }
+
+    // ==========================================
+    // HELPER: CREATE AUTH USER (NO EMAIL SENT)
+    //
+    // Uses the Admin API (service role key) so:
+    //   • No confirmation email is ever sent → no rate limit
+    //   • Any email format is accepted (e.g. fake@lcc.edu)
+    //   • User is immediately active and can log in
+    // ==========================================
+
+    async _createAuthUser(email, password) {
+        // Prefer admin API (bypasses email entirely)
+        if (window.supabaseAdmin) {
+            const { data, error } = await window.supabaseAdmin.auth.admin.createUser({
+                email:         email,
+                password:      password,
+                email_confirm: true,   // Mark as confirmed — no email sent
+            });
+            if (error) throw error;
+            return data.user.id;
+        }
+
+        // Fallback: regular signUp (requires "Disable email confirmations" in Supabase)
+        const { data, error } = await window.supabase.auth.signUp({ email, password });
+        if (error) throw error;
+        const uid = data?.user?.id;
+        if (!uid) throw new Error(
+            'Account creation returned no user ID. ' +
+            'Please paste your service_role key into admin-dashboard.html, or ' +
+            'disable email confirmations in Supabase → Authentication → Settings.'
+        );
+        return uid;
+    }
+
+    // ==========================================
+    // ENROLL STUDENT
+    // Auth email is always studentId@lcc.edu — NEVER the contact email field.
+    // ==========================================
+
+    async handleEnrollStudent() {
+        const btn       = document.getElementById('btn-save-student');
+        const studentId = document.getElementById('add-student-id').value.trim();
+        const fullName  = document.getElementById('add-student-fullname').value.trim();
+
+        if (!studentId || !fullName) return this.showModalError('addStudentModal', 'Required fields missing.');
+
+        this.setButtonLoading(btn, true, 'Enrolling...');
+
+        try {
+            // DIRECT INSERT TO DATABASE
+            const { error: profileError } = await window.supabase.from('profiles').insert({
+                school_id:      studentId,
+                full_name:      fullName,
+                role:           'student',
+                program:        document.getElementById('add-student-program').value,
+                sex:            document.getElementById('add-student-sex').value,
+                birthday:       document.getElementById('add-student-bday').value || null,
+                age:            parseInt(document.getElementById('add-student-age').value) || null,
+                address:        document.getElementById('add-student-address').value.trim(),
+                contact:        document.getElementById('add-student-contact').value.trim(),
+                email:          document.getElementById('add-student-email').value.trim() || `${studentId}@lcc.edu`,
+                father_name:    document.getElementById('add-student-father').value.trim(),
+                father_contact: document.getElementById('add-student-father-contact').value.trim(),
+                mother_name:    document.getElementById('add-student-mother').value.trim(),
+                mother_contact: document.getElementById('add-student-mother-contact').value.trim(),
+            });
+
+            if (profileError) throw profileError;
+
+            this.closeModalById('addStudentModal');
+            this.clearForm('addStudentModal');
+            this.showToast(`✅ "${fullName}" enrolled! Login with ID: ${studentId}`);
+            this.loadStudents();
+            this.loadDashboardStats();
+
+        } catch (err) {
+            this.showModalError('addStudentModal', err.message);
+        } finally {
+            this.setButtonLoading(btn, false, 'Enroll Student');
+        }
+    }
+
+    async handleAddTeacher() {
+        const addTeacherModal = document.getElementById('addTeacherModal');
+        const btn = addTeacherModal.querySelector('.btn-submit');
+        const username  = document.getElementById('teacher-username').value.trim();
+        const fullName  = document.getElementById('teacher-fullname').value.trim();
+        const dept      = document.getElementById('teacher-dept').value.trim();
+
+        if (!username || !fullName) return this.showModalError('addTeacherModal', 'Required fields missing.');
+
+        this.setButtonLoading(btn, true, 'Saving...');
+
+        try {
+            // DIRECT INSERT TO DATABASE
+            const { error: profileError } = await window.supabase.from('profiles').insert({
+                school_id:  username,
+                full_name:  fullName,
+                role:       'faculty',
+                department: dept,
+                email:      document.getElementById('teacher-email').value.trim() || `${username}@lcc.edu`,
+            });
+
+            if (profileError) throw profileError;
+
+            this.closeModalById('addTeacherModal');
+            this.clearForm('addTeacherModal');
+            this.showToast(`✅ Teacher "${fullName}" added! Login ID: ${username}`);
+            this.loadTeachers();
+            this.loadDashboardStats();
+
+        } catch (err) {
+            this.showModalError('addTeacherModal', err.message);
+        } finally {
+            this.setButtonLoading(btn, false, 'Save Teacher');
+        }
+    }
+    // ==========================================
+    // ADD SECTION
+    // Direct INSERT — no auth user needed.
+    // ==========================================
+
+    async handleAddSection() {
+        const addSectionModal = document.getElementById('addSectionModal');
+        const btn = addSectionModal.querySelector('.btn-submit');
+
+        const sectionName = document.getElementById('add-sec-name').value.trim();
+        const program     = document.getElementById('add-sec-program').value;
+        const yearLevel   = document.getElementById('add-sec-year').value;
+        const semester    = document.getElementById('add-sec-sem').value;
+
+        if (!sectionName) {
+            return this.showModalError('addSectionModal', 'Section Name is required.');
+        }
+
+        this.setButtonLoading(btn, true, 'Saving...');
+
+        try {
+            const { error } = await window.supabase.from('sections').insert({
+                section_name: sectionName,
+                program:      program,
+                year_level:   yearLevel,
+                semester:     semester,
+                school_year:  this.getCurrentSchoolYear(),
+            });
+
+            if (error) throw error;
+
+            this.closeModalById('addSectionModal');
+            this.clearForm('addSectionModal');
+            this.showToast(`✅ Section "${sectionName}" created!`);
+            this.loadSections();
+            this.loadDashboardStats();
+
+        } catch (err) {
+            this.showModalError('addSectionModal', 'Error: ' + err.message);
+        } finally {
+            this.setButtonLoading(btn, false, 'Save Section');
+        }
+    }
+
+    // ==========================================
+    // UPDATE STUDENT
+    // ==========================================
+
+    async handleUpdateStudent() {
+        const btn       = document.getElementById('btn-update-student');
+        const studentId = document.getElementById('edit-student-id').value.trim();
+        const fullName  = document.getElementById('edit-student-fullname').value.trim();
+
+        if (!fullName) return this.showModalError('editStudentModal', 'Full Name is required.');
+
+        this.setButtonLoading(btn, true, 'Updating...');
+
+        try {
+            const { error } = await window.supabase.from('profiles').update({
+                full_name:      fullName,
+                program:        document.getElementById('edit-student-program').value,
+                sex:            document.getElementById('edit-student-sex').value,
+                birthday:       document.getElementById('edit-student-bday').value || null,
+                age:            parseInt(document.getElementById('edit-student-age').value) || null,
+                address:        document.getElementById('edit-student-address').value.trim(),
+                contact:        document.getElementById('edit-student-contact').value.trim(),
+                email:          document.getElementById('edit-student-email').value.trim(),
+                father_name:    document.getElementById('edit-student-father').value.trim(),
+                father_contact: document.getElementById('edit-student-father-contact').value.trim(),
+                mother_name:    document.getElementById('edit-student-mother').value.trim(),
+                mother_contact: document.getElementById('edit-student-mother-contact').value.trim(),
+            }).eq('school_id', studentId);
+
+            if (error) throw error;
+
+            this.closeModalById('editStudentModal');
+            this.showToast(`✅ "${fullName}" updated successfully!`);
+            this.loadStudents();
+
+        } catch (err) {
+            this.showModalError('editStudentModal', 'Error: ' + err.message);
+        } finally {
+            this.setButtonLoading(btn, false, 'Update Student');
+        }
+    }
+
+    // ==========================================
+    // SUPABASE: FETCH & RENDER DATA
+    // ==========================================
+
+    async loadDashboardStats() {
+        const [{ count: studentCount }, { count: teacherCount }, { count: sectionCount }] = await Promise.all([
+            window.supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'student'),
+            window.supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'faculty'),
+            window.supabase.from('sections').select('*', { count: 'exact', head: true }),
+        ]);
+
+        const el = (id) => document.getElementById(id);
+        if (el('stat-students')) el('stat-students').textContent = studentCount ?? 0;
+        if (el('stat-teachers')) el('stat-teachers').textContent = teacherCount ?? 0;
+        if (el('stat-sections')) el('stat-sections').textContent = sectionCount ?? 0;
+    }
+
+    async loadStudents() {
+        const { data: students, error } = await window.supabase
+            .from('profiles')
+            .select('*')
+            .eq('role', 'student')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('loadStudents error:', error);
+            return;
+        }
+
+        // ── Students view table ──
+        const tbody = document.querySelector('#students-view .data-table tbody');
+        if (tbody) {
+            tbody.innerHTML = '';
+            if (!students || students.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--gray-400);padding:2rem;font-size:0.88rem;">No students enrolled yet. Click "+ Enroll Student" to add one.</td></tr>`;
+            } else {
+                students.forEach(student => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><span class="subject-code">${student.school_id}</span></td>
+                            <td>
+                                <a href="#" class="student-name-link" onclick="adminApp.openStudentProfile('${student.id}'); return false;">
+                                    ${student.full_name}
+                                </a>
+                            </td>
+                            <td>${student.program || '—'}</td>
+                            <td><span class="access-badge unlocked">Active</span></td>
+                            <td class="text-right">
+                                <div class="action-btns justify-end">
+                                    <button class="btn-action btn-grades" onclick="adminApp.openEditStudentModal('${student.id}')">Edit</button>
+                                    <button class="btn-delete" onclick="adminApp.deleteProfile('${student.id}')">Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+
+        // ── Dashboard "Recently Added" table ──
+        const recentTbody = document.querySelector('#dashboard-view .data-table tbody');
+        if (recentTbody) {
+            recentTbody.innerHTML = '';
+            if (!students || students.length === 0) {
+                recentTbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--gray-400);padding:1.5rem;font-size:0.88rem;">No students added yet.</td></tr>`;
+            } else {
+                students.slice(0, 5).forEach(student => {
+                    recentTbody.innerHTML += `
+                        <tr>
+                            <td><span class="subject-code">${student.school_id}</span></td>
+                            <td>${student.full_name}</td>
+                            <td>${student.program || '—'}</td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+    }
+
+    async loadTeachers() {
+        const { data: teachers, error } = await window.supabase
+            .from('profiles')
+            .select('*')
+            .eq('role', 'faculty')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('loadTeachers error:', error);
+            return;
+        }
+
+        const tbody = document.querySelector('#teachers-view .data-table tbody');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+        if (!teachers || teachers.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--gray-400);padding:2rem;font-size:0.88rem;">No teachers added yet. Click "+ Add Teacher" to get started.</td></tr>`;
+            return;
+        }
+
+        teachers.forEach(teacher => {
+            tbody.innerHTML += `
+                <tr>
+                    <td><span class="subject-code">${teacher.school_id}</span></td>
+                    <td>${teacher.full_name}</td>
+                    <td>${teacher.email || teacher.school_id + '@lcc.edu'}</td>
+                    <td>${teacher.department || '—'}</td>
+                    <td class="text-right">
+                        <div class="action-btns justify-end">
+                            <button class="btn-delete" onclick="adminApp.deleteProfile('${teacher.id}')">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    async loadSections() {
+        const { data: sections, error } = await window.supabase
+            .from('sections')
+            .select('id, section_name, school_year, semester, subjects(title)');
+
+        if (error) {
+            console.error('loadSections error:', error);
+            return;
+        }
+
+        const tbody = document.querySelector('#sections-view .data-table tbody');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+        if (!sections || sections.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--gray-400);padding:2rem;font-size:0.88rem;">No sections created yet. Click "+ Add Section" to create one.</td></tr>`;
+            return;
+        }
+
+        sections.forEach(sec => {
+            tbody.innerHTML += `
+                <tr>
+                    <td><span class="subject-code">${sec.section_name}</span></td>
+                    <td>${sec.subjects?.title || '—'}</td>
+                    <td>${sec.school_year || '—'}</td>
+                    <td>${sec.semester || '—'}</td>
+                    <td class="text-right">
+                        <div class="action-btns justify-end">
+                            <button class="btn-delete" onclick="adminApp.deleteSection('${sec.id}')">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    // ==========================================
+    // OPEN EDIT STUDENT MODAL
+    // ==========================================
+
+    async openEditStudentModal(profileId) {
+        const { data: student, error } = await window.supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', profileId)
+            .single();
+
+        if (error || !student) return alert('Could not load student data.');
+
+        document.getElementById('edit-student-id').value             = student.school_id    || '';
+        document.getElementById('edit-student-fullname').value       = student.full_name    || '';
+        document.getElementById('edit-student-sex').value            = student.sex          || 'Male';
+        document.getElementById('edit-student-bday').value           = student.birthday     || '';
+        document.getElementById('edit-student-age').value            = student.age          || '';
+        document.getElementById('edit-student-address').value        = student.address      || '';
+        document.getElementById('edit-student-contact').value        = student.contact      || '';
+        document.getElementById('edit-student-email').value          = student.email        || '';
+        document.getElementById('edit-student-program').value        = student.program      || 'BSIT';
+        document.getElementById('edit-student-father').value         = student.father_name   || '';
+        document.getElementById('edit-student-father-contact').value = student.father_contact || '';
+        document.getElementById('edit-student-mother').value         = student.mother_name   || '';
+        document.getElementById('edit-student-mother-contact').value = student.mother_contact || '';
+
+        this.openModal('editStudentModal');
+    }
+
+    // ==========================================
+    // DELETION
+    // ==========================================
+
+    async deleteProfile(id) {
+        if (!confirm('Delete this user? This removes their profile. To fully delete the login account, use the Supabase dashboard.')) return;
+
+        const { error } = await window.supabase.from('profiles').delete().eq('id', id);
+        if (error) {
+            alert('Failed to delete profile: ' + error.message);
+        } else {
+            // Try to also delete auth account via admin API
+            if (window.supabaseAdmin) {
+                await window.supabaseAdmin.auth.admin.deleteUser(id).catch(() => {});
+            }
+            this.showToast('User deleted.');
+            this.loadStudents();
+            this.loadTeachers();
+            this.loadDashboardStats();
+        }
+    }
+
+    async deleteSection(id) {
+        if (!confirm('Delete this section? This may affect linked records.')) return;
+        const { error } = await window.supabase.from('sections').delete().eq('id', id);
+        if (error) {
+            alert('Failed to delete section: ' + error.message);
+        } else {
+            this.showToast('Section deleted.');
+            this.loadSections();
+            this.loadDashboardStats();
+        }
+    }
+
+    // ==========================================
+    // UI / MODAL UTILITIES
+    // ==========================================
+
     initEvents() {
-        // UI Navigation & Modals
         this.modalTriggers.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
-                this.openModal(btn.getAttribute('data-modal-target'));
+                const targetModal = btn.getAttribute('data-modal-target');
+                this.openModal(targetModal);
+                if (targetModal === 'addTeacherModal') this.populateTeacherSectionDropdown();
             });
         });
 
@@ -38,119 +532,14 @@ class AdminDashboardController {
                 if (sidebarLink) sidebarLink.click();
             });
         });
-    }
 
-    // ==========================================
-    // SUPABASE DATABASE FETCHING
-    // ==========================================
-
-    async loadStudents() {
-        const { data: students, error } = await window.supabase
-            .from('profiles')
-            .select('*')
-            .eq('role', 'student');
-
-        if (error) return console.error(error);
-
-        const tbody = document.querySelector('#students-view .data-table tbody');
-        if (!tbody) return;
-        
-        tbody.innerHTML = '';
-        students.forEach(student => {
-            tbody.innerHTML += `
-                <tr>
-                    <td><span class="subject-code">${student.school_id}</span></td>
-                    <td>${student.full_name}</td>
-                    <td>${student.program || 'N/A'}</td>
-                    <td><span class="access-badge unlocked">Active</span></td>
-                    <td class="text-right">
-                        <div class="action-btns justify-end">
-                            <button class="btn-delete" onclick="adminApp.deleteProfile('${student.id}')">Delete</button>
-                        </div>
-                    </td>
-                </tr>
-            `;
+        // Close modal when clicking the backdrop
+        this.modals.forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) this.closeModal(overlay);
+            });
         });
     }
-
-    async loadTeachers() {
-        const { data: teachers, error } = await window.supabase
-            .from('profiles')
-            .select('*')
-            .eq('role', 'faculty');
-
-        if (error) return console.error(error);
-
-        const tbody = document.querySelector('#teachers-view .data-table tbody');
-        if (!tbody) return;
-
-        tbody.innerHTML = '';
-        teachers.forEach(teacher => {
-            tbody.innerHTML += `
-                <tr>
-                    <td><span class="subject-code">${teacher.school_id}</span></td>
-                    <td>${teacher.full_name}</td>
-                    <td>${teacher.school_id}@lcc.edu</td>
-                    <td>Faculty Department</td>
-                    <td class="text-right">
-                        <div class="action-btns justify-end">
-                            <button class="btn-delete" onclick="adminApp.deleteProfile('${teacher.id}')">Delete</button>
-                        </div>
-                    </td>
-                </tr>
-            `;
-        });
-    }
-
-    async loadSections() {
-        const { data: sections, error } = await window.supabase
-            .from('sections')
-            .select('id, section_name, school_year, semester, subjects(title)');
-
-        if (error) return console.error(error);
-
-        const tbody = document.querySelector('#sections-view .data-table tbody');
-        if (!tbody) return;
-
-        tbody.innerHTML = '';
-        sections.forEach(sec => {
-            tbody.innerHTML += `
-                <tr>
-                    <td><span class="subject-code">${sec.section_name}</span></td>
-                    <td>${sec.subjects?.title || 'Unknown Subject'}</td>
-                    <td>${sec.school_year}</td>
-                    <td>${sec.semester}</td>
-                    <td class="text-right">
-                        <div class="action-btns justify-end">
-                            <button class="btn-delete" onclick="adminApp.deleteSection('${sec.id}')">Delete</button>
-                        </div>
-                    </td>
-                </tr>
-            `;
-        });
-    }
-
-    // ==========================================
-    // SUPABASE DELETION
-    // ==========================================
-
-    async deleteProfile(id) {
-        if (!confirm('Delete this user permanently?')) return;
-        const { error } = await window.supabase.from('profiles').delete().eq('id', id);
-        if (error) alert(error.message);
-        else { this.loadStudents(); this.loadTeachers(); }
-    }
-
-    async deleteSection(id) {
-        if (!confirm('Delete this section?')) return;
-        const { error } = await window.supabase.from('sections').delete().eq('id', id);
-        if (error) alert(error.message);
-        else this.loadSections();
-    }
-
-    // ==========================================
-    // UI UTILITIES
-    // ==========================================
 
     openModal(modalId) {
         const modal = document.getElementById(modalId);
@@ -160,9 +549,119 @@ class AdminDashboardController {
     closeModal(modalElement) {
         modalElement.classList.remove('open');
     }
+
+    closeModalById(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) modal.classList.remove('open');
+    }
+
+    clearForm(modalId) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+        modal.querySelectorAll('input:not([readonly]), select, textarea').forEach(el => {
+            el.value = el.tagName === 'SELECT' ? (el.options[0]?.value ?? '') : '';
+        });
+        const errEl = modal.querySelector('.modal-form-error');
+        if (errEl) errEl.remove();
+    }
+
+    setButtonLoading(btn, isLoading, loadingText) {
+        if (!btn) return;
+        btn.disabled    = isLoading;
+        btn.textContent = loadingText;
+    }
+
+    showModalError(modalId, message) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+        let errEl = modal.querySelector('.modal-form-error');
+        if (!errEl) {
+            errEl           = document.createElement('p');
+            errEl.className = 'modal-form-error';
+            errEl.style.cssText = 'color:#dc2626;background:#fee2e2;padding:0.6rem 0.9rem;border-radius:8px;font-size:0.82rem;margin-bottom:0.75rem;';
+            modal.querySelector('.modal-body').prepend(errEl);
+        }
+        errEl.textContent = message;
+    }
+
+    showToast(message) {
+        let t = document.getElementById('adminToast');
+        if (!t) {
+            t           = document.createElement('div');
+            t.id        = 'adminToast';
+            t.className = 'admin-toast';
+            document.body.appendChild(t);
+        }
+        t.textContent = message;
+        t.classList.add('visible');
+        clearTimeout(this._toastTimer);
+        this._toastTimer = setTimeout(() => t.classList.remove('visible'), 5000);
+    }
+
+    async populateTeacherSectionDropdown() {
+        const select = document.getElementById('teacher-section');
+        if (!select) return;
+        select.innerHTML = '<option value="">— No section yet —</option>';
+        const { data: sections } = await window.supabase
+            .from('sections')
+            .select('id, section_name')
+            .order('section_name');
+        if (sections) {
+            sections.forEach(sec => {
+                const opt       = document.createElement('option');
+                opt.value       = sec.id;
+                opt.textContent = sec.section_name;
+                select.appendChild(opt);
+            });
+        }
+    }
+
+    getCurrentSchoolYear() {
+        const now   = new Date();
+        const year  = now.getFullYear();
+        const month = now.getMonth() + 1;
+        return month >= 6 ? `${year}-${year + 1}` : `${year - 1}-${year}`;
+    }
+
+    openStudentProfile(profileId) {
+        this.openEditStudentModal(profileId);
+    }
 }
 
 let adminApp;
 document.addEventListener('DOMContentLoaded', () => {
     adminApp = new AdminDashboardController();
 });
+
+/*
+=============================================================
+  SETUP CHECKLIST — READ THIS
+=============================================================
+
+  STEP 1 — Paste your service_role key
+    In admin-dashboard.html, find:
+      const SUPABASE_SERVICE_KEY = 'YOUR_SERVICE_ROLE_KEY_HERE';
+    Replace with your key from:
+      Supabase Dashboard → Settings → API → service_role (secret)
+
+    This is what removes the email rate limit. The admin API
+    creates users instantly with no email sent at all.
+
+  STEP 2 — Disable RLS insert policy for profiles (or add one)
+    If you get "new row violates RLS" errors:
+      Supabase → Table Editor → profiles → RLS Policies
+      Add an INSERT policy: "allow authenticated" or disable RLS
+      while testing.
+
+  STEP 3 — profiles table columns required
+    id, school_id, full_name, role, program, sex,
+    birthday, age, address, contact, email,
+    father_name, father_contact, mother_name,
+    mother_contact, department, created_at
+
+  HOW LOGIN WORKS
+    Students:  ID = "2026-001"  → email: 2026-001@lcc.edu  password: 2026-001
+    Teachers:  Username = "t.doe" → email: t.doe@lcc.edu   password: t.doe
+    (Default password always equals the username/ID — tell users to change it)
+=============================================================
+*/

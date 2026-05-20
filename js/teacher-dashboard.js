@@ -13,19 +13,20 @@ class TeacherDashboardController {
     }
 
     async loadTeacherData() {
-        // 1. Get Logged in Teacher
-        const { data: { user } } = await window.supabase.auth.getUser();
-        if (!user) return window.location.href = 'login.html';
+        const localSession = JSON.parse(localStorage.getItem('lcc_user'));
+        if (!localSession) return window.location.href = 'login.html';
+        const user = { id: localSession.id }; // Creates the user object your code expects
 
-        // 2. Get Sections assigned to this teacher
         const { data: sections, error } = await window.supabase
             .from('sections')
             .select('id, section_name, subjects(code, title)')
             .eq('faculty_id', user.id);
 
-        if (error || !sections.length) return console.log('No sections assigned.');
+        // FIX: Added null safety for 'sections'
+        if (error || !sections || sections.length === 0) {
+            return console.log('No sections assigned.');
+        }
 
-        // 3. Load students for the first section by default
         this.loadStudentsForSection(sections[0].id);
     }
 
@@ -50,6 +51,8 @@ class TeacherDashboardController {
         tbody.innerHTML = '';
         records.forEach((record, index) => {
             const isLocked = record.status === 'Locked';
+            
+            // FIX: Removed inline style on the button, replaced with class 'btn-toggle-small'
             tbody.innerHTML += `
                 <tr>
                     <td>${index + 1}</td>
@@ -61,7 +64,7 @@ class TeacherDashboardController {
                     </td>
                     <td>
                         <span class="access-status-label ${isLocked ? 'status-locked' : 'status-unlocked'}">${record.status}</span>
-                        <button style="margin-left: 10px; font-size: 0.7rem; padding: 2px 5px;" onclick="teacherApp.toggleSingleGrade('${record.id}', '${isLocked ? 'Unlocked' : 'Locked'}')">Toggle</button>
+                        <button class="btn-toggle-small" onclick="teacherApp.toggleSingleGrade('${record.id}', '${isLocked ? 'Unlocked' : 'Locked'}')">Toggle</button>
                     </td>
                 </tr>
             `;

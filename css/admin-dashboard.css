@@ -177,3 +177,273 @@
     width: 88%; 
     background: #22c55e;
 }
+/* =========================================
+   MISSING CLASSES & DESIGN POLISH
+   ========================================= */
+
+/* Large modal for multi-section forms */
+.modal-lg {
+    max-width: 640px !important;
+}
+
+/* Scrollable modal body */
+.modal-scrollable {
+    max-height: 70vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--gray-300) transparent;
+}
+.modal-scrollable::-webkit-scrollbar { width: 5px; }
+.modal-scrollable::-webkit-scrollbar-track { background: transparent; }
+.modal-scrollable::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 99px; }
+
+/* Section headings inside modals */
+.modal-section-heading {
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--blue-700);
+    background: var(--blue-50);
+    border-left: 3px solid var(--blue-500);
+    padding: 0.4rem 0.75rem;
+    border-radius: 0 6px 6px 0;
+    margin: 1.25rem 0 0.9rem;
+}
+.modal-section-heading:first-child { margin-top: 0; }
+
+/* Scrollable table wrapper */
+.table-scroll-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Small toggle button in grade table */
+.btn-toggle-small {
+    padding: 0.2rem 0.55rem;
+    border-radius: 5px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    border: 1px solid var(--gray-200);
+    background: var(--gray-50);
+    color: var(--gray-600);
+    cursor: pointer;
+    font-family: var(--font);
+    transition: all 0.15s;
+    margin-left: 0.4rem;
+    vertical-align: middle;
+}
+.btn-toggle-small:hover {
+    background: var(--blue-600);
+    color: var(--white);
+    border-color: var(--blue-600);
+}
+
+/* Toast notification */
+.admin-toast {
+    position: fixed;
+    bottom: 1.75rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(16px);
+    background: var(--gray-900);
+    color: var(--white);
+    padding: 0.75rem 1.5rem;
+    border-radius: 999px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index: 9999;
+    white-space: nowrap;
+    max-width: 90vw;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.admin-toast.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+}
+
+/* Student profile card overlay */
+.profile-card-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 600;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+.profile-card-overlay.open { display: flex; }
+
+.profile-card {
+    background: var(--white);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.22);
+    overflow: hidden;
+    animation: floatCard 0.3s ease;
+}
+
+@keyframes floatCard {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.profile-card-header {
+    padding: 2rem 1.5rem 1.5rem;
+    text-align: center;
+    position: relative;
+    background: linear-gradient(135deg, #0f766e, #134e4a);
+}
+
+.profile-card-close {
+    position: absolute;
+    top: 0.85rem;
+    right: 0.85rem;
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: var(--white);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+.profile-card-close:hover { background: rgba(255,255,255,0.28); }
+
+.profile-card-avatar {
+    margin: 0 auto 0.85rem;
+}
+
+.profile-card-name {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--white);
+    margin-bottom: 0.4rem;
+    letter-spacing: -0.02em;
+}
+
+.profile-card-subtitle {
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.65);
+    margin-top: 0.4rem;
+}
+
+.profile-card-body {
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    max-height: 55vh;
+    overflow-y: auto;
+}
+
+.profile-card-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--gray-100);
+    gap: 1rem;
+}
+.profile-card-row:last-child { border-bottom: none; }
+.profile-card-row.full-width { flex-direction: column; gap: 0.25rem; }
+
+.pc-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--gray-400);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.pc-value {
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    text-align: right;
+}
+.pc-value.left-align { text-align: left; }
+
+.profile-card-guardian-sec {
+    margin-top: 0.75rem;
+}
+
+.pc-section-title {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--gray-400);
+    margin-bottom: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--gray-100);
+}
+
+.pc-parents-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.pc-parent-card {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 0.75rem;
+}
+
+.pc-parent-card h5 {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--gray-400);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 0.35rem;
+}
+
+.pc-parent-val {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--gray-800);
+    line-height: 1.3;
+}
+
+.pc-parent-meta {
+    font-size: 0.74rem;
+    color: var(--gray-500);
+    margin-top: 0.2rem;
+}
+
+/* Student name link in tables */
+.student-name-link {
+    color: var(--blue-600);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.15s;
+}
+.student-name-link:hover {
+    color: var(--blue-800);
+    text-decoration: underline;
+}
+
+/* justify-end for action button groups */
+.justify-end { justify-content: flex-end; }
+
+/* Improve bottom-grid to single column on admin dashboard */
+#dashboard-view .bottom-grid {
+    grid-template-columns: 1fr;
+}
+
+/* Panel body zero-padding for table panels */
+.panel-body { padding: 0; }

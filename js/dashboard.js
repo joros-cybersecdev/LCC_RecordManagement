@@ -59,8 +59,9 @@ class DashboardController {
     
     async loadMyData() {
         // 1. Get Logged-in User
-        const { data: { user } } = await window.supabase.auth.getUser();
-        if (!user) return window.location.href = 'login.html';
+        const localSession = JSON.parse(localStorage.getItem('lcc_user'));
+        if (!localSession) return window.location.href = 'login.html';
+        const user = { id: localSession.id };
 
         // 2. Update Profile Name in UI
         const { data: profile } = await window.supabase
@@ -101,10 +102,14 @@ class DashboardController {
             const isUnlocked = record.status === 'Unlocked';
             const displayGrade = isUnlocked && record.grade ? record.grade : '--';
             
+            // FIX: Prevent NaN cascade if record.grade is missing/invalid
             if (isUnlocked && record.grade) {
-                totalUnits += subject.units;
-                gradeSum += parseFloat(record.grade);
-                count++;
+                const parsedGrade = parseFloat(record.grade);
+                if (!isNaN(parsedGrade)) {
+                    totalUnits += subject.units;
+                    gradeSum += parsedGrade;
+                    count++;
+                }
             }
 
             tbody.innerHTML += `

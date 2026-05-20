@@ -9,6 +9,13 @@
 
     <link rel="stylesheet" href="css/lcc-style.css">
     <link rel="stylesheet" href="css/login.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = 'https://ptsfqtyehangvzrinzag.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_e-wNRIRqYtvDQsuMApW54A__jsdBUEn';
+        window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    </script>
 </head>
 
 <body class="login-body">
@@ -73,14 +80,14 @@
                 <div class="login-accent-line"></div>
                 
                 
-                <form action="student-dashboard.html" method="POST" class="login-form">
-
+                <form class="login-form" id="loginForm">
+                    <div id="loginAlert" class="hidden-alert" style="color: #dc2626; background: #fee2e2; padding: 10px; border-radius: 6px; margin-bottom: 1rem; font-size: 0.85rem; text-align: center;"></div>
                     <div class="role-selector">
 
                         <button type="button" class="role-btn active" data-role="student">
                             Student
                         </button>
-                        <button type="button" class="role-btn" data-role="teacher">
+                        <button type="button" class="role-btn" data-role="faculty">
                             Teacher
                         </button>
                         <button type="button" class="role-btn" data-role="admin">

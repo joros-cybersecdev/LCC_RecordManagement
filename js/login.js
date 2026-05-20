@@ -61,31 +61,36 @@ class LoginForm {
         const password = this.passwordInput.value;
         const role = this.roleInput.value;
 
-        // Convert username to a mock email for Supabase Auth (e.g. 26-0001@lcc.edu)
-        const email = username.includes('@') ? username : `${username}@lcc.edu`;
-
         try {
-            // 1. Authenticate with Supabase
-            const { data, error } = await window.supabase.auth.signInWithPassword({
-                email: email,
-                password: password
-            });
-
-            if (error) throw error;
-
-            // 2. Verify Role in Profiles Table
-            const { data: profile, error: profileError } = await window.supabase
+            // 1. Direct Database Query (Bypass Auth API entirely)
+            const { data: profile, error } = await window.supabase
                 .from('profiles')
-                .select('role')
-                .eq('id', data.user.id)
+                .select('*')
+                .eq('school_id', username)
+                .eq('role', role)
                 .single();
 
-            if (profileError || profile.role !== role) {
-                await window.supabase.auth.signOut();
-                throw new Error("Unauthorized: Invalid role for this account.");
+            if (error || !profile) {
+                throw new Error("Account not found. Please check your ID and Role.");
             }
 
-            // 3. Redirect to correct dashboard
+            // 2. Simple Password Verification (Prototype Logic)
+            // Admin password check
+            if (role === 'admin' && password !== 'admin123') {
+                throw new Error("Invalid admin password.");
+            }
+            // Student/Teacher password check (Default password = their ID)
+            if (role !== 'admin' && password !== username) {
+                throw new Error("Invalid password.");
+            }
+
+            // 3. Create a Local Browser Session
+            localStorage.setItem('lcc_user', JSON.stringify({
+                id: profile.id,
+                role: profile.role
+            }));
+
+            // 4. Redirect to the correct dashboard
             if (role === 'admin') window.location.href = 'admin-dashboard.html';
             else if (role === 'faculty') window.location.href = 'teacher-dashboard.html';
             else window.location.href = 'student-dashboard.html';
