@@ -9,6 +9,15 @@
 
     <link rel="stylesheet" href="css/lcc-style.css">
     <link rel="stylesheet" href="css/login.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        const SUPABASE_URL = 'https://ptsfqtyehangvzrinzag.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_e-wNRIRqYtvDQsuMApW54A__jsdBUEn';
+        // Create a global instance to be used by all your other JS files
+        window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    </script>
 </head>
 
 <body class="login-body">

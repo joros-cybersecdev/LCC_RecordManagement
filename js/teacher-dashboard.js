@@ -1,466 +1,103 @@
-class TeacherAccessController {
+class TeacherDashboardController {
     constructor() {
         this.unlockAllBtn = document.getElementById('btn-unlock-all');
         this.lockAllBtn = document.getElementById('btn-lock-all');
-        // Select the save button specifically in the access view
-        this.saveAccessBtn = document.querySelector('#access-view .panel-footer .btn-save');
-
+        
         this.initEvents();
-        this.loadInitialState();
+        this.loadTeacherData();
     }
 
     initEvents() {
-        if (this.unlockAllBtn) this.unlockAllBtn.addEventListener('click', () => this.toggleAll(true));
-        if (this.lockAllBtn) this.lockAllBtn.addEventListener('click', () => this.toggleAll(false));
-        
-        // Listen to all toggles
-        document.querySelectorAll('.access-toggle').forEach(toggle => {
-            toggle.addEventListener('change', (e) => this.handleToggleChange(e.target));
-        });
-
-        // Attach the save functionality to the button
-        if (this.saveAccessBtn) {
-            this.saveAccessBtn.addEventListener('click', () => this.saveAccessSettings());
-        }
+        if (this.unlockAllBtn) this.unlockAllBtn.addEventListener('click', () => this.toggleAllGrades('Unlocked'));
+        if (this.lockAllBtn) this.lockAllBtn.addEventListener('click', () => this.toggleAllGrades('Locked'));
     }
 
-    // Load the correct toggle states from localStorage when the page opens
-    loadInitialState() {
-        let gradesDB = JSON.parse(localStorage.getItem('gradesDB'));
-        if (!gradesDB) return;
+    async loadTeacherData() {
+        // 1. Get Logged in Teacher
+        const { data: { user } } = await window.supabase.auth.getUser();
+        if (!user) return window.location.href = 'login.html';
 
-        const rows = document.querySelectorAll('#access-view tbody tr');
-        rows.forEach(row => {
-            const studentIdSpan = row.querySelector('.subject-code');
-            const toggle = row.querySelector('.access-toggle');
+        // 2. Get Sections assigned to this teacher
+        const { data: sections, error } = await window.supabase
+            .from('sections')
+            .select('id, section_name, subjects(code, title)')
+            .eq('faculty_id', user.id);
 
-            if (studentIdSpan && toggle) {
-                const studentId = studentIdSpan.textContent.trim();
-                if (gradesDB[studentId]) {
-                    // Find the subject (currently hardcoded to IT301 for the demo)
-                    const subjectData = gradesDB[studentId].find(g => g.code === 'IT301');
-                    if (subjectData) {
-                        // If it is NOT locked in DB, it should be checked (unlocked)
-                        toggle.checked = !subjectData.locked;
-                        this.updateLabelStyle(toggle);
-                    }
-                }
-            }
-        });
+        if (error || !sections.length) return console.log('No sections assigned.');
+
+        // 3. Load students for the first section by default
+        this.loadStudentsForSection(sections[0].id);
     }
 
-    toggleAll(state) {
-        document.querySelectorAll('.access-toggle').forEach(checkbox => {
-            checkbox.checked = state;
-            this.updateLabelStyle(checkbox);
-        });
+    async loadStudentsForSection(sectionId) {
+        const { data: records, error } = await window.supabase
+            .from('records')
+            .select(`
+                id, grade, status, payment_status,
+                profiles ( full_name, school_id )
+            `)
+            .eq('section_id', sectionId);
+
+        if (error) return console.error(error);
+
+        this.renderGradeTable(records);
     }
 
-    handleToggleChange(checkbox) {
-        this.updateLabelStyle(checkbox);
-    }
-
-    updateLabelStyle(checkbox) {
-        const row = checkbox.closest('tr');
-        if (!row) return;
-
-        const label = row.querySelector('.access-status-label');
-        if (label) {
-            if (checkbox.checked) {
-                label.textContent = 'Unlocked';
-                label.classList.remove('status-locked');
-                label.classList.add('status-unlocked');
-            } else {
-                label.textContent = 'Locked';
-                label.classList.remove('status-unlocked');
-                label.classList.add('status-locked');
-            }
-        }
-    }
-
-    // The logic to save states back to the database
-    saveAccessSettings() {
-        let gradesDB = JSON.parse(localStorage.getItem('gradesDB'));
-        if (!gradesDB) {
-            alert('No database found.');
-            return;
-        }
-
-        const rows = document.querySelectorAll('#access-view tbody tr');
-
-        rows.forEach(row => {
-            const studentIdSpan = row.querySelector('.subject-code');
-            const toggle = row.querySelector('.access-toggle');
-
-            if (studentIdSpan && toggle) {
-                const studentId = studentIdSpan.textContent.trim();
-                const isUnlocked = toggle.checked;
-
-                if (gradesDB[studentId]) {
-                    const subjectIndex = gradesDB[studentId].findIndex(g => g.code === 'IT301');
-                    if (subjectIndex !== -1) {
-                        // If toggle is checked (unlocked), locked becomes false.
-                        gradesDB[studentId][subjectIndex].locked = !isUnlocked;
-                    }
-                }
-            }
-        });
-
-        // Save back to localStorage so the Student Dashboard can read the update
-        localStorage.setItem('gradesDB', JSON.stringify(gradesDB));
-        alert('Grade access settings saved successfully!');
-    }
-}
-
-class TeacherDashboardController {
-    constructor() {
-        this.loadUserProfile();
-        this.loadAssignedSubjects();
-        this.initGradesManagement();
-    }
-
-    loadUserProfile() {
-        const sessionData = JSON.parse(localStorage.getItem('currentUser'));
-        if (!sessionData || sessionData.role !== 'teacher') return;
-
-        const firstName = sessionData.fullname.split(' ')[0];
-        const initial = firstName.charAt(0).toUpperCase();
-
-        document.querySelectorAll('.sidebar-user-name, .header-user-name, .info-name').forEach(el => {
-            if (el) el.textContent = sessionData.fullname;
-        });
-
-        const subtitle = document.getElementById('page-subtitle');
-        if (subtitle) subtitle.textContent = `Welcome, ${firstName}!`;
-
-        document.querySelectorAll('.sidebar-avatar.teacher-av, .header-avatar.teacher-av, .info-avatar.teacher-av-lg').forEach(el => {
-            if (el) el.textContent = initial;
-        });
-
-        const infoMeta = document.querySelector('.info-banner .info-meta');
-        if (infoMeta) {
-            infoMeta.innerHTML = `${sessionData.department} &bull; Teacher`;
-        }
-    }
-
-    loadAssignedSubjects() {
-        const container = document.querySelector('.subjects-cards');
-        if (!container) return; 
-
-        container.innerHTML = '';
-        const sessionData = JSON.parse(localStorage.getItem('currentUser'));
-        if (!sessionData || sessionData.role !== 'teacher') return;
-
-        let allSubjects = JSON.parse(localStorage.getItem('teacherSubjects')) || [];
-        let savedSubjects = allSubjects.filter(sub => sub.teacherUsername === sessionData.username);
-        
-        if (savedSubjects.length === 0) {
-            container.innerHTML = `<div style="grid-column: 1 / -1; padding: 2rem; text-align: center; color: #64748b;">No subjects have been assigned to you yet.</div>`;
-            return;
-        }
-
-        savedSubjects.forEach(subject => {
-            const cardHTML = `
-                <div class="subject-detail-card">
-                    <div class="sdc-header">
-                        <div class="sdc-code">${subject.code}</div>
-                        <span class="sdc-units">${subject.units} units</span>
-                    </div>
-                    <h3 class="sdc-name">${subject.title}</h3>
-                    <div class="sdc-meta">
-                        <div class="sdc-meta-item">
-                            <span class="sdc-meta-label">Section</span>
-                            <span class="sdc-meta-value">${subject.section}</span>
-                        </div>
-                        <div class="sdc-meta-item">
-                            <span class="sdc-meta-label">Program</span>
-                            <span class="sdc-meta-value">${subject.program}</span>
-                        </div>
-                        <div class="sdc-meta-item">
-                            <span class="sdc-meta-label">Year Level</span>
-                            <span class="sdc-meta-value">${subject.year}</span>
-                        </div>
-                        <div class="sdc-meta-item">
-                            <span class="sdc-meta-label">Students</span>
-                            <span class="sdc-meta-value">Pending</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-            container.insertAdjacentHTML('beforeend', cardHTML);
-        });
-    }
-
-    initGradesManagement() {
-        const saveBtn = document.getElementById('save-grades-btn');
-        if (saveBtn) saveBtn.addEventListener('click', () => this.saveGrades());
-        this.renderManageGradesTable();
-    }
-
-    renderManageGradesTable() {
-        const tbody = document.getElementById('manage-grades-tbody');
+    renderGradeTable(records) {
+        const tbody = document.querySelector('#grades-view .data-table tbody');
         if (!tbody) return;
 
-        let gradesDB = JSON.parse(localStorage.getItem('gradesDB'));
-        if(!gradesDB) return;
-
-        const students = [
-            { id: '2026-001', name: 'John Doe', status: 'paid' },
-            { id: '2026-002', name: 'Maria Clara', status: 'paid' }
-        ];
-
         tbody.innerHTML = '';
-        
-        students.forEach((student, idx) => {
-            const sGrades = gradesDB[student.id].find(g => g.code === 'IT301');
-            const prelim = sGrades.prelim || '';
-            const midterm = sGrades.midterm || '';
-            const final = sGrades.final || '';
-
-            let remarks = '<span class="empty-grade-text">No grade yet</span>';
-
-            if (prelim && midterm && final) {
-                const avg = ((parseFloat(prelim) + parseFloat(midterm) + parseFloat(final)) / 3);
-                if (avg <= 3.0) {
-                    remarks = `<span class="grade-pill grade-high">Passed</span>`;
-                } else {
-                    remarks = `<span class="grade-pill grade-low" style="background: #fee2e2; color: #991b1b;">Failed</span>`;
-                }
-            }
-
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${idx + 1}</td>
-                <td><span class="subject-code">${student.id}</span></td>
-                <td>${student.name}</td>
-                <td><span class="access-badge unlocked">Paid</span></td>
-                <td><input type="number" class="grade-input prelim-input" value="${prelim}" step="0.25" min="1.00" max="5.00" data-id="${student.id}"></td>
-                <td><input type="number" class="grade-input midterm-input" value="${midterm}" step="0.25" min="1.00" max="5.00" data-id="${student.id}"></td>
-                <td><input type="number" class="grade-input final-input" value="${final}" step="0.25" min="1.00" max="5.00" data-id="${student.id}"></td>
-                <td>${remarks}</td>
+        records.forEach((record, index) => {
+            const isLocked = record.status === 'Locked';
+            tbody.innerHTML += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td><span class="subject-code">${record.profiles.school_id}</span></td>
+                    <td>${record.profiles.full_name}</td>
+                    <td><span class="access-badge ${record.payment_status === 'Paid' ? 'unlocked' : 'locked'}">${record.payment_status}</span></td>
+                    <td>
+                        <input type="number" class="grade-input" id="grade-${record.id}" value="${record.grade || ''}" step="0.25" min="1.00" max="5.00" onblur="teacherApp.updateGrade('${record.id}', this.value)">
+                    </td>
+                    <td>
+                        <span class="access-status-label ${isLocked ? 'status-locked' : 'status-unlocked'}">${record.status}</span>
+                        <button style="margin-left: 10px; font-size: 0.7rem; padding: 2px 5px;" onclick="teacherApp.toggleSingleGrade('${record.id}', '${isLocked ? 'Unlocked' : 'Locked'}')">Toggle</button>
+                    </td>
+                </tr>
             `;
-            tbody.appendChild(tr);
         });
     }
 
-    saveGrades() {
-        let gradesDB = JSON.parse(localStorage.getItem('gradesDB'));
-        const tbody = document.getElementById('manage-grades-tbody');
-        const rows = tbody.querySelectorAll('tr');
+    // ==========================================
+    // SUPABASE UPDATES
+    // ==========================================
 
-        rows.forEach(row => {
-            const prelimInput = row.querySelector('.prelim-input');
-            const midtermInput = row.querySelector('.midterm-input');
-            const finalInput = row.querySelector('.final-input');
+    async updateGrade(recordId, newGrade) {
+        if (!newGrade) return;
+        const { error } = await window.supabase
+            .from('records')
+            .update({ grade: parseFloat(newGrade) })
+            .eq('id', recordId);
 
-            const studentId = prelimInput.getAttribute('data-id');
+        if (error) alert('Error saving grade: ' + error.message);
+    }
 
-            const pVal = prelimInput.value ? parseFloat(prelimInput.value) : null;
-            const mVal = midtermInput.value ? parseFloat(midtermInput.value) : null;
-            const fVal = finalInput.value ? parseFloat(finalInput.value) : null;
+    async toggleSingleGrade(recordId, newStatus) {
+        const { error } = await window.supabase
+            .from('records')
+            .update({ status: newStatus })
+            .eq('id', recordId);
 
-            const subjectIndex = gradesDB[studentId].findIndex(g => g.code === 'IT301');
-            if (subjectIndex !== -1) {
-                gradesDB[studentId][subjectIndex].prelim = pVal;
-                gradesDB[studentId][subjectIndex].midterm = mVal;
-                gradesDB[studentId][subjectIndex].final = fVal;
-            }
-        });
+        if (!error) this.loadTeacherData(); // Refresh UI
+    }
 
-        localStorage.setItem('gradesDB', JSON.stringify(gradesDB));
-        alert('Grades successfully saved!');
-        
-        this.renderManageGradesTable(); 
+    async toggleAllGrades(newStatus) {
+        // In a real app, you would pass the section ID here to update all in a section.
+        alert(`Bulk update to ${newStatus} triggered.`);
     }
 }
 
-class TeacherDashboardController {
-    constructor() {
-        // Core interactive elements for toggles
-        this.unlockAllBtn = document.getElementById('btn-unlock-all');
-        this.lockAllBtn = document.getElementById('btn-lock-all');
-        this.accessToggles = document.querySelectorAll('.access-toggle');
-
-        // 1. Load the user profile details immediately
-        this.loadUserProfile();
-
-        // 2. Load the subjects
-        this.loadAssignedSubjects();
-
-        if (this.accessToggles.length > 0) {
-            this.initEvents();
-        }
-    }
-
-    loadUserProfile() {
-        // Fetch the session created by the login page
-        const sessionData = JSON.parse(localStorage.getItem('currentUser'));
-        if (!sessionData || sessionData.role !== 'teacher') return;
-
-        // Extract first name and initial for UI elements
-        const firstName = sessionData.fullname.split(' ')[0];
-        const initial = firstName.charAt(0).toUpperCase();
-
-        // 1. Update all Full Name displays (Sidebar, Header, Banner)
-        document.querySelectorAll('.sidebar-user-name, .header-user-name, .info-name').forEach(el => {
-            if (el) el.textContent = sessionData.fullname;
-        });
-
-        // 2. Update Welcome subtitle
-        const subtitle = document.getElementById('page-subtitle');
-        if (subtitle) subtitle.textContent = `Welcome, ${firstName}!`;
-
-        // 3. Update all Avatars (Sidebar, Header, Banner)
-        document.querySelectorAll('.sidebar-avatar.teacher-av, .header-avatar.teacher-av, .info-avatar.teacher-av-lg').forEach(el => {
-            if (el) el.textContent = initial;
-        });
-
-        // 4. Update the Department in the banner
-        const infoMeta = document.querySelector('.info-banner .info-meta');
-        if (infoMeta) {
-            infoMeta.innerHTML = `${sessionData.department} &bull; Teacher`;
-        }
-    }
-
-    /**
-     * Loads subjects from localStorage and generates HTML cards
-     */
-    loadAssignedSubjects() {
-        const cardsContainer = document.querySelector('.subjects-cards');
-        const dashboardTableBody = document.querySelector('#dashboard-view .data-table tbody');
-
-        // CRITICAL: Wipe out the hardcoded HTML dummy data so dynamic data doesn't mix!
-        if (cardsContainer) cardsContainer.innerHTML = '';
-        if (dashboardTableBody) dashboardTableBody.innerHTML = '';
-
-        // Get the identity of the person currently logged in
-        const sessionData = JSON.parse(localStorage.getItem('currentUser'));
-        if (!sessionData || sessionData.role !== 'teacher') return;
-
-        // Grab ALL subjects in the system
-        let allSubjects = JSON.parse(localStorage.getItem('teacherSubjects')) || [];
-        
-        // FILTER: Keep only the subjects tagged with this specific teacher's username
-        let savedSubjects = allSubjects.filter(sub => sub.teacherUsername === sessionData.username);
-        
-        // --- UPDATE STATS & BANNERS DYNAMICALLY ---
-        const subjectCountElem = document.querySelector('.stat-card.blue .stat-card-value');
-        if (subjectCountElem) {
-            subjectCountElem.textContent = savedSubjects.length;
-        }
-
-        const infoMetaElements = document.querySelectorAll('.info-meta');
-        if (infoMetaElements.length > 1) {
-            infoMetaElements[1].innerHTML = `Handling ${savedSubjects.length} subject(s) &bull; Pending students`;
-        }
-
-        // --- HANDLE EMPTY STATE ---
-        if (savedSubjects.length === 0) {
-            if (cardsContainer) cardsContainer.innerHTML = `<div style="grid-column: 1 / -1; padding: 2rem; text-align: center; color: #64748b;">No subjects have been assigned to you yet.</div>`;
-            if (dashboardTableBody) dashboardTableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #64748b;">No subjects assigned.</td></tr>`;
-            return;
-        }
-
-        // --- RENDER DYNAMIC DATA ---
-        savedSubjects.forEach(subject => {
-            
-            // 1. Render the Card for the "My Subjects" Tab
-            if (cardsContainer) {
-                const cardHTML = `
-                    <div class="subject-detail-card">
-                        <div class="sdc-header">
-                            <div class="sdc-code">${subject.code}</div>
-                            <span class="sdc-units">${subject.units} units</span>
-                        </div>
-                        <h3 class="sdc-name">${subject.title}</h3>
-                        <div class="sdc-meta">
-                            <div class="sdc-meta-item">
-                                <span class="sdc-meta-label">Section</span>
-                                <span class="sdc-meta-value">${subject.section}</span>
-                            </div>
-                            <div class="sdc-meta-item">
-                                <span class="sdc-meta-label">Program</span>
-                                <span class="sdc-meta-value">${subject.program}</span>
-                            </div>
-                            <div class="sdc-meta-item">
-                                <span class="sdc-meta-label">Year Level</span>
-                                <span class="sdc-meta-value">${subject.year}</span>
-                            </div>
-                            <div class="sdc-meta-item">
-                                <span class="sdc-meta-label">Students</span>
-                                <span class="sdc-meta-value">Pending</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                cardsContainer.insertAdjacentHTML('beforeend', cardHTML);
-            }
-
-            // 2. Render the Table Row for the main "Dashboard" Tab
-            if (dashboardTableBody) {
-                const rowHTML = `
-                    <tr>
-                        <td><span class="subject-code">${subject.code}</span></td>
-                        <td>${subject.title}</td>
-                        <td>${subject.units}</td>
-                        <td>${subject.section}</td>
-                        <td>${subject.program}</td>
-                        <td>2025-2026</td>
-                    </tr>
-                `;
-                dashboardTableBody.insertAdjacentHTML('beforeend', rowHTML);
-            }
-        });
-    }
-
-    initEvents() {
-        // Global Unlock/Lock Buttons
-        if (this.unlockAllBtn) {
-            this.unlockAllBtn.addEventListener('click', () => this.toggleAll(true));
-        }
-
-        if (this.lockAllBtn) {
-            this.lockAllBtn.addEventListener('click', () => this.toggleAll(false));
-        }
-
-        // Individual switch listeners
-        this.accessToggles.forEach(toggle => {
-            toggle.addEventListener('change', (e) => this.handleToggleChange(e.target));
-        });
-    }
-
-    toggleAll(state) {
-        this.accessToggles.forEach(checkbox => {
-            checkbox.checked = state;
-            this.updateLabelStyle(checkbox);
-        });
-    }
-
-    handleToggleChange(checkbox) {
-        this.updateLabelStyle(checkbox);
-    }
-
-    updateLabelStyle(checkbox) {
-        const row = checkbox.closest('tr');
-        if (!row) return;
-
-        const label = row.querySelector('.access-status-label');
-        if (label) {
-            if (checkbox.checked) {
-                label.textContent = 'Unlocked';
-                label.classList.remove('status-locked');
-                label.classList.add('status-unlocked');
-            } else {
-                label.textContent = 'Locked';
-                label.classList.remove('status-unlocked');
-                label.classList.add('status-locked');
-            }
-        }
-    }
-}
-
-// Initialize when DOM is ready
+let teacherApp;
 document.addEventListener('DOMContentLoaded', () => {
-    new TeacherAccessController();
-    new TeacherDashboardController();
+    teacherApp = new TeacherDashboardController();
 });

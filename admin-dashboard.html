@@ -9,6 +9,15 @@
     <link rel="stylesheet" href="css/lcc-style.css">
     <link rel="stylesheet" href="css/student-dashboard.css"> 
     <link rel="stylesheet" href="css/admin-dashboard.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        const SUPABASE_URL = 'https://ptsfqtyehangvzrinzag.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_e-wNRIRqYtvDQsuMApW54A__jsdBUEn';
+        // Create a global instance to be used by all your other JS files
+        window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    </script>
 </head>
 <body class="dashboard-body">
 
@@ -124,50 +133,16 @@
                             <h3 class="panel-title">Recently Added Students</h3>
                         </div>
                         <div class="panel-body">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Student ID</th>
-                                        <th>Full Name</th>
-                                        <th>Program</th>
-                                        <th>Payment</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><span class="subject-code">2026-001</span></td>
-                                        <td>John Doe</td>
-                                        <td>BSIT</td>
-                                        <td><span class="access-badge unlocked">Paid</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td><span class="subject-code">2026-002</span></td>
-                                        <td>Maria Clara</td>
-                                        <td>BSIT</td>
-                                        <td><span class="access-badge locked">Unpaid</span></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="panel">
-                        <div class="panel-header">
-                            <h3 class="panel-title">Payment Overview</h3>
-                        </div>
-                        <div class="panel-body payment-overview-body">
-                            <div class="payment-header">
-                                <span>Paid (88%)</span>
-                                <span class="payment-unpaid">Unpaid (12%)</span>
-                            </div>
-                            
-                            <div class="progress-track">
-                                <div class="progress-fill"></div>
-                            </div>
-                            
-                            <div class="text-center mt-lg">
-                                <button class="btn-action btn-grades nav-trigger" data-route="students-view">Manage Payments</button>
-                            </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID Number</th>
+                                    <th>Full Name</th>
+                                    <th>Program / Section</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
                         </div>
                     </div>
                 </div> 
@@ -207,14 +182,6 @@
                     <button type="button" class="btn-add modal-trigger" data-modal-target="addTeacherModal">+ Add Teacher</button>
                 </div>
 
-            <div id="teachers-view" class="view-section hidden">
-                <div class="panel-toolbar filter-bar">
-                    <div class="search-bar">
-                        <input type="text" class="search-input" placeholder="Search teachers...">
-                    </div>
-                    <button type="button" class="btn-add modal-trigger" data-modal-target="addTeacherModal">+ Add Teacher</button>
-                </div>
-
                 <div class="panel">
                     <div class="panel-header">
                         <h3 class="panel-title">Faculty Roster</h3>
@@ -222,15 +189,6 @@
                     <div class="panel-body">
                         <table class="data-table">
                             <thead>
-                                <tr>
-                                    <th>Username</th>
-                                    <th>Full Name</th>
-                                    <th>Email Address</th>
-                                    <th>Department</th>
-                                    <th class="text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
                                 <tr>
                                     <th>Username</th>
                                     <th>Full Name</th>
@@ -662,7 +620,6 @@
                 </div>
                 <button type="button" class="btn-add modal-trigger" data-modal-target="assignNewSubjectModal">+ Assign Subject</button>
             </div>
-
             <div class="table-scroll-wrapper">
                 <table class="data-table">
                     <thead>
@@ -674,7 +631,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        </tbody>
+                    </tbody>
                 </table>
             </div>
         </div>

@@ -207,3 +207,226 @@
 .table-scroll-wrapper .data-table {
     margin-bottom: 0;
 }
+
+.toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 9999;
+}
+.toast {
+    padding: 1rem 1.5rem;
+    border-radius: var(--radius-md);
+    background: var(--white);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    color: var(--gray-800);
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-left: 4px solid var(--blue-600);
+    animation: slideIn 0.3s ease-out, fadeOut 0.3s ease-out 2.7s forwards;
+}
+.toast.success { border-left-color: #16a34a; }
+.toast.error { border-left-color: #dc2626; }
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
+
+.progress-fill {
+    height: 100%;
+    width: var(--progress, 0%); /* Defaults to 0% if variable is not passed */
+    background: #22c55e;
+}
+
+.modal-lg {
+    max-width: 650px;
+    width: 100%; /* Ensures responsiveness on mobile */
+}
+
+.filter-bar-transparent {
+    box-shadow: none;
+    padding: 0 0 1rem 0;
+    border: none;
+    background: transparent;
+}
+
+/* CSS */
+/* =========================================
+   STUDENT PROFILE CARD OVERLAY
+   ========================================= */
+.profile-card-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.profile-card-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.profile-card {
+    background: var(--white);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 420px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    transform: scale(0.95);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    font-family: var(--font);
+}
+
+.profile-card-overlay.active .profile-card {
+    transform: scale(1);
+}
+
+.profile-card-header {
+    padding: 2rem 1.5rem 1.5rem;
+    text-align: center;
+    position: relative;
+    color: var(--white);
+}
+
+.profile-card-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: var(--white);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.profile-card-close:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.profile-card-avatar {
+    margin: 0 auto 0.75rem;
+}
+
+.profile-card-name {
+    margin: 0 0 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.profile-card-subtitle {
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    opacity: 0.9;
+    font-weight: 500;
+}
+
+.profile-card-body {
+    padding: 1.5rem;
+}
+
+.profile-card-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0.5rem;
+    border-bottom: 1px solid var(--gray-200);
+    transition: background 0.2s;
+    font-size: 0.85rem;
+}
+
+.profile-card-row:hover {
+    background: var(--gray-50);
+    border-radius: 4px;
+    border-bottom-color: transparent;
+}
+
+.profile-card-row.full-width {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+}
+
+.pc-label {
+    color: var(--gray-500);
+    font-weight: 500;
+}
+
+.pc-value {
+    color: var(--gray-800);
+    font-weight: 600;
+    text-align: right;
+}
+
+.pc-value.left-align {
+    text-align: left;
+}
+
+.profile-card-guardian-sec {
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 2px dashed var(--gray-200);
+}
+
+.pc-section-title {
+    font-size: 0.8rem;
+    color: var(--gray-500);
+    margin-bottom: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+}
+
+.pc-parents-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.pc-parent-card {
+    background: var(--gray-50);
+    padding: 0.85rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--gray-200);
+}
+
+.pc-parent-card h5 {
+    margin: 0 0 0.5rem;
+    color: var(--blue-600);
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+}
+
+.pc-parent-val {
+    color: var(--gray-800);
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 0.2rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pc-parent-meta {
+    color: var(--gray-500);
+    font-size: 0.75rem;
+    font-weight: 500;
+}

@@ -9,6 +9,15 @@
     <link rel="stylesheet" href="css/lcc-style.css">
     <link rel="stylesheet" href="css/student-dashboard.css">
     <link rel="stylesheet" href="css/teacher-dashboard.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        const SUPABASE_URL = 'https://ptsfqtyehangvzrinzag.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_e-wNRIRqYtvDQsuMApW54A__jsdBUEn';
+        // Create a global instance to be used by all your other JS files
+        window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    </script>   
 </head>
 <body class="dashboard-body">
 
@@ -171,7 +180,60 @@
 
             <div id="subjects-view" class="view-section hidden">
                 <div class="subjects-cards">
+                    
+                    <div class="subject-detail-card">
+                        <div class="sdc-header">
+                            <div class="sdc-code">IT301</div>
+                            <span class="sdc-units">3 units</span>
+                        </div>
+                        <h3 class="sdc-name">Web Development II</h3>
+                        <div class="sdc-meta">
+                            <div class="sdc-meta-item">
+                                <span class="sdc-meta-label">Section</span>
+                                <span class="sdc-meta-value">BSIT-3A</span>
+                            </div>
+                            <div class="sdc-meta-item">
+                                <span class="sdc-meta-label">Program</span>
+                                <span class="sdc-meta-value">BSIT</span>
+                            </div>
+                            <div class="sdc-meta-item">
+                                <span class="sdc-meta-label">Year Level</span>
+                                <span class="sdc-meta-value">3rd Year</span>
+                            </div>
+                            <div class="sdc-meta-item">
+                                <span class="sdc-meta-label">Students</span>
+                                <span class="sdc-meta-value">30</span>
+                            </div>
+                        </div>
                     </div>
+
+                    <div class="subject-detail-card">
+                        <div class="sdc-header">
+                            <div class="sdc-code">IT302</div>
+                            <span class="sdc-units">3 units</span>
+                        </div>
+                        <h3 class="sdc-name">Database Management Systems</h3>
+                        <div class="sdc-meta">
+                            <div class="sdc-meta-item">
+                                <span class="sdc-meta-label">Section</span>
+                                <span class="sdc-meta-value">BSIT-3A</span>
+                            </div>
+                            <div class="sdc-meta-item">
+                                <span class="sdc-meta-label">Program</span>
+                                <span class="sdc-meta-value">BSIT</span>
+                            </div>
+                            <div class="sdc-meta-item">
+                                <span class="sdc-meta-label">Year Level</span>
+                                <span class="sdc-meta-value">3rd Year</span>
+                            </div>
+                            <div class="sdc-meta-item">
+                                <span class="sdc-meta-label">Students</span>
+                                <span class="sdc-meta-value">30</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
 
             <div id="grades-view" class="view-section hidden">
@@ -201,17 +263,35 @@
                                     <th>Student ID</th>
                                     <th>Full Name</th>
                                     <th>Payment</th>
-                                    <th>Prelim</th>
-                                    <th>Midterm</th>
-                                    <th>Final</th>
+                                    <th>Grade (1.00 - 5.00)</th>
                                     <th>Remarks</th>
                                 </tr>
                             </thead>
-                            <tbody id="manage-grades-tbody">
-                                </tbody>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td><span class="subject-code">2026-001</span></td>
+                                    <td>John Doe</td>
+                                    <td><span class="access-badge unlocked">Paid</span></td>
+                                    <td>
+                                        <input type="number" class="grade-input" value="1.50" step="0.25" min="1.00" max="5.00">
+                                    </td>
+                                    <td><span class="grade-pill grade-high">Passed</span></td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td><span class="subject-code">2026-002</span></td>
+                                    <td>Maria Clara</td>
+                                    <td><span class="access-badge locked">Unpaid</span></td>
+                                    <td>
+                                        <input type="number" class="grade-input" value="" step="0.25" min="1.00" max="5.00" placeholder="e.g. 1.50">
+                                    </td>
+                                    <td><span class="empty-grade-text">No grade yet</span></td>
+                                </tr>
+                            </tbody>
                         </table>
                         <div class="panel-footer">
-                            <button type="button" class="btn-save" id="save-grades-btn">Save Grades</button>
+                            <button type="button" class="btn-save">Save Grades</button>
                         </div>
                     </div>
                 </div>
@@ -252,6 +332,7 @@
                                     <th>Student ID</th>
                                     <th>Full Name</th>
                                     <th>Payment Status</th>
+                                    <th>Grade</th>
                                     <th>Grade Access</th>
                                 </tr>
                             </thead>
@@ -261,6 +342,7 @@
                                     <td><span class="subject-code">2026-001</span></td>
                                     <td>John Doe</td>
                                     <td><span class="access-badge unlocked">Paid</span></td>
+                                    <td><span class="grade-pill grade-high">1.50</span></td>
                                     <td>
                                         <div class="toggle-wrapper">
                                             <label class="toggle-switch">
@@ -275,7 +357,8 @@
                                     <td>2</td>
                                     <td><span class="subject-code">2026-002</span></td>
                                     <td>Maria Clara</td>
-                                    <td><span class="access-badge unlocked">Paid</span></td>
+                                    <td><span class="access-badge locked">Unpaid</span></td>
+                                    <td><span class="empty-grade-text">No grade yet</span></td>
                                     <td>
                                         <div class="toggle-wrapper">
                                             <label class="toggle-switch">
