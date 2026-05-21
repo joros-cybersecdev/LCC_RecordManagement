@@ -123,20 +123,6 @@
                             <span class="stat-card-value">120</span>
                         </div>
                     </div>
-                    <div class="stat-card sky">
-                        <div class="stat-card-icon">&#128202;</div>
-                        <div class="stat-card-body">
-                            <span class="stat-card-label">Grades Entered</span>
-                            <span class="stat-card-value">95</span>
-                        </div>
-                    </div>
-                    <div class="stat-card violet">
-                        <div class="stat-card-icon">&#128275;</div>
-                        <div class="stat-card-body">
-                            <span class="stat-card-label">Grades Unlocked</span>
-                            <span class="stat-card-value">80</span>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="panel">
@@ -263,19 +249,23 @@
                                     <th>Student ID</th>
                                     <th>Full Name</th>
                                     <th>Payment</th>
-                                    <th>Grade (1.00 - 5.00)</th>
+                                    <th>Prelim</th>
+                                    <th>Midterm</th>
+                                    <th>Final</th>
+                                    <th>Final Rating</th>
                                     <th>Remarks</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
                                     <td>1</td>
-                                    <td><span class="subject-code">2026-001</span></td>
+                                    <td><span class="subject-code">2026-001234</span></td>
                                     <td>John Doe</td>
                                     <td><span class="access-badge unlocked">Paid</span></td>
-                                    <td>
-                                        <input type="number" class="grade-input" value="1.50" step="0.25" min="1.00" max="5.00">
-                                    </td>
+                                    <td><input type="number" class="grade-input" value="1.25" step="0.25" min="1.00" max="5.00"></td>
+                                    <td><input type="number" class="grade-input" value="1.25" step="0.25" min="1.00" max="5.00"></td>
+                                    <td><input type="number" class="grade-input" value="1.25" step="0.25" min="1.00" max="5.00"></td>
+                                    <td><input type="number" class="grade-input" value="1.25" step="0.25" min="1.00" max="5.00" readonly style="background:#f0fdf4;font-weight:700;color:#15803d;"></td>
                                     <td><span class="grade-pill grade-high">Passed</span></td>
                                 </tr>
                                 <tr>
@@ -283,9 +273,10 @@
                                     <td><span class="subject-code">2026-002</span></td>
                                     <td>Maria Clara</td>
                                     <td><span class="access-badge locked">Unpaid</span></td>
-                                    <td>
-                                        <input type="number" class="grade-input" value="" step="0.25" min="1.00" max="5.00" placeholder="e.g. 1.50">
-                                    </td>
+                                    <td><input type="number" class="grade-input" value="" step="0.25" min="1.00" max="5.00" placeholder="—"></td>
+                                    <td><input type="number" class="grade-input" value="" step="0.25" min="1.00" max="5.00" placeholder="—"></td>
+                                    <td><input type="number" class="grade-input" value="" step="0.25" min="1.00" max="5.00" placeholder="—"></td>
+                                    <td><input type="number" class="grade-input" value="" step="0.25" min="1.00" max="5.00" placeholder="—" readonly style="background:#f9fafb;"></td>
                                     <td><span class="empty-grade-text">No grade yet</span></td>
                                 </tr>
                             </tbody>
@@ -332,17 +323,17 @@
                                     <th>Student ID</th>
                                     <th>Full Name</th>
                                     <th>Payment Status</th>
-                                    <th>Grade</th>
+                                    <th>Final Rating</th>
                                     <th>Grade Access</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
                                     <td>1</td>
-                                    <td><span class="subject-code">2026-001</span></td>
+                                    <td><span class="subject-code">2026-001234</span></td>
                                     <td>John Doe</td>
                                     <td><span class="access-badge unlocked">Paid</span></td>
-                                    <td><span class="grade-pill grade-high">1.50</span></td>
+                                    <td><span class="grade-pill grade-high">1.25</span></td>
                                     <td>
                                         <div class="toggle-wrapper">
                                             <label class="toggle-switch">

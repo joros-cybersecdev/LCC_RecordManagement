@@ -17,6 +17,7 @@ class AdminDashboardController {
             this.loadTeachers();
             this.loadSections();
             this.loadDashboardStats();
+            this.initGradesView();
         }
     }
 
@@ -466,6 +467,254 @@ class AdminDashboardController {
         document.getElementById('edit-student-mother-contact').value = student.mother_contact || '';
 
         this.openModal('editStudentModal');
+    }
+
+    // ==========================================
+    // GRADES VIEW — Read-only monitor for admin
+    // ==========================================
+
+    async initGradesView() {
+        // Populate section dropdown and wire up change events
+        await this.populateGradesSectionDropdown();
+
+        const secSelect = document.getElementById('admin-grades-section-select');
+        const subSelect = document.getElementById('admin-grades-subject-select');
+
+        if (secSelect) {
+            secSelect.addEventListener('change', async () => {
+                const sectionId = secSelect.value;
+                subSelect.innerHTML = '<option value="">— All Subjects —</option>';
+                if (!sectionId) return;
+                await this.populateGradesSubjectDropdown(sectionId);
+                this.loadGrades(sectionId, subSelect.value);
+            });
+        }
+
+        if (subSelect) {
+            subSelect.addEventListener('change', () => {
+                const sectionId = secSelect ? secSelect.value : '';
+                if (sectionId) this.loadGrades(sectionId, subSelect.value);
+            });
+        }
+    }
+
+    async populateGradesSectionDropdown() {
+        const select = document.getElementById('admin-grades-section-select');
+        if (!select) return;
+
+        const { data: sections } = await window.supabase
+            .from('sections')
+            .select('id, section_name, semester, school_year')
+            .order('section_name');
+
+        if (sections) {
+            sections.forEach(sec => {
+                const opt = document.createElement('option');
+                opt.value = sec.id;
+                opt.textContent = `${sec.section_name} — ${sec.semester || ''} ${sec.school_year || ''}`.trim();
+                select.appendChild(opt);
+            });
+        }
+    }
+
+    async populateGradesSubjectDropdown(sectionId) {
+        const select = document.getElementById('admin-grades-subject-select');
+        if (!select) return;
+
+        const { data: section } = await window.supabase
+            .from('sections')
+            .select('subjects(id, code, title)')
+            .eq('id', sectionId)
+            .single();
+
+        if (section?.subjects) {
+            const opt = document.createElement('option');
+            opt.value = section.subjects.id;
+            opt.textContent = `${section.subjects.code} — ${section.subjects.title}`;
+            select.appendChild(opt);
+        }
+    }
+
+    async loadGrades(sectionId, subjectId = '') {
+        const tbody = document.getElementById('admin-grades-tbody');
+        const tfoot = document.getElementById('admin-grades-tfoot');
+        const countEl = document.getElementById('admin-grades-count');
+        const panelTitle = document.getElementById('admin-grades-panel-title');
+        const panelSub = document.getElementById('admin-grades-panel-sub');
+
+        if (!tbody) return;
+
+        // Show loading state
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--gray-400);padding:2rem;">Loading grades…</td></tr>`;
+
+        // Fetch section info for panel header
+        const { data: secInfo } = await window.supabase
+            .from('sections')
+            .select('section_name, semester, school_year, subjects(code, title)')
+            .eq('id', sectionId)
+            .single();
+
+        if (panelTitle && secInfo) {
+            panelTitle.textContent = `${secInfo.subjects?.code || ''} — ${secInfo.subjects?.title || secInfo.section_name}`;
+        }
+        if (panelSub && secInfo) {
+            panelSub.textContent = `${secInfo.section_name} • ${secInfo.school_year || ''} • ${secInfo.semester || ''}`;
+        }
+
+        // Fetch records with student profiles
+        const query = window.supabase
+            .from('records')
+            .select(`
+                id, prelim, midterm, final, final_rating, status, payment_status,
+                profiles ( full_name, school_id )
+            `)
+            .eq('section_id', sectionId);
+
+        const { data: records, error } = await query;
+        if (error) {
+            tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:#dc2626;padding:2rem;">Error loading grades: ${error.message}</td></tr>`;
+            return;
+        }
+
+        this.renderGradesTable(records || [], countEl, tfoot);
+    }
+
+    renderGradesTable(records, countEl, tfoot) {
+        const tbody = document.getElementById('admin-grades-tbody');
+        if (!tbody) return;
+
+        if (!records || records.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--gray-400);padding:2.5rem;font-size:0.88rem;">No student records found for this section.</td></tr>`;
+            if (tfoot) tfoot.innerHTML = '';
+            if (countEl) countEl.textContent = '0 student(s)';
+            return;
+        }
+
+        const fmt = (val) => {
+            if (val === null || val === undefined || val === '') return '—';
+            const n = parseFloat(val);
+            return isNaN(n) ? '—' : n.toFixed(2);
+        };
+
+        tbody.innerHTML = '';
+        let gwaSum = 0;
+        let gwaCount = 0;
+        let paidCount = 0;
+
+        records.forEach((record, i) => {
+            const profile    = record.profiles || {};
+            const isPaid     = record.payment_status === 'Paid';
+            const fr         = fmt(record.final_rating);
+            const isReleased = record.status === 'Unlocked';
+            const hasFR      = fr !== '—';
+
+            if (isPaid) paidCount++;
+            if (hasFR && isReleased) {
+                gwaSum += parseFloat(record.final_rating);
+                gwaCount++;
+            }
+
+            // Grade color class
+            const gc = (val) => {
+                if (!isReleased || val === '—') return 'grade-locked';
+                const n = parseFloat(val);
+                return (isNaN(n) || n > 3.0) ? 'grade-low' : 'grade-high';
+            };
+
+            // Remarks
+            let remarks = `<span class="empty-grade-text">Pending</span>`;
+            if (isReleased && hasFR) {
+                const frNum = parseFloat(record.final_rating);
+                remarks = frNum <= 3.0
+                    ? `<span class="grade-pill grade-high">Passed</span>`
+                    : `<span class="grade-pill grade-low">Failed</span>`;
+            } else if (!isReleased) {
+                remarks = `<span class="access-badge locked" style="font-size:0.72rem;">Locked</span>`;
+            }
+
+            tbody.innerHTML += `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td><span class="subject-code">${profile.school_id || '—'}</span></td>
+                    <td style="font-weight:600;">${profile.full_name || '—'}</td>
+                    <td><span class="access-badge ${isPaid ? 'unlocked' : 'locked'}">${record.payment_status || 'Unpaid'}</span></td>
+                    <td><span class="grade-pill ${gc(record.prelim)}">${isReleased ? fmt(record.prelim) : '—'}</span></td>
+                    <td><span class="grade-pill ${gc(record.midterm)}">${isReleased ? fmt(record.midterm) : '—'}</span></td>
+                    <td><span class="grade-pill ${gc(record.final)}">${isReleased ? fmt(record.final) : '—'}</span></td>
+                    <td><span class="grade-pill ${hasFR && isReleased ? gc(record.final_rating) : 'grade-locked'}" style="font-weight:800;">${isReleased ? fr : '—'}</span></td>
+                    <td>${remarks}</td>
+                </tr>
+            `;
+        });
+
+        // Count badge
+        if (countEl) countEl.textContent = `${records.length} student(s) · ${paidCount} paid`;
+
+        // GWA tfoot
+        const gwa = gwaCount > 0 ? (gwaSum / gwaCount).toFixed(2) : 'N/A';
+        if (tfoot) {
+            tfoot.innerHTML = `
+                <tr class="tfoot-bg">
+                    <td colspan="7" class="tfoot-label">Section GWA (Released Grades Only)</td>
+                    <td class="tfoot-value"><strong>${gwa}</strong></td>
+                    <td></td>
+                </tr>
+            `;
+        }
+    }
+
+    printGradeReport() {
+        const panel = document.getElementById('admin-grades-panel');
+        if (!panel) return;
+
+        const title   = document.getElementById('admin-grades-panel-title')?.textContent || 'Grade Report';
+        const sub     = document.getElementById('admin-grades-panel-sub')?.textContent   || '';
+        const tableEl = document.getElementById('admin-grades-table');
+        if (!tableEl) return;
+
+        const printWin = window.open('', '_blank', 'width=900,height=700');
+        printWin.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>${title} — LCC Grade Report</title>
+                <style>
+                    * { margin: 0; padding: 0; box-sizing: border-box; }
+                    body { font-family: 'Plus Jakarta Sans', Arial, sans-serif; font-size: 12px; color: #111; padding: 2rem; }
+                    .print-header { text-align: center; margin-bottom: 1.5rem; border-bottom: 2px solid #1e3a5f; padding-bottom: 1rem; }
+                    .print-header h1 { font-size: 1.1rem; font-weight: 800; color: #1e3a5f; }
+                    .print-header p  { font-size: 0.82rem; color: #555; margin-top: 0.2rem; }
+                    .print-header .school { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.3rem; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+                    th { background: #1e3a5f; color: #fff; padding: 0.5rem 0.75rem; font-size: 0.75rem; text-align: left; }
+                    td { padding: 0.45rem 0.75rem; border-bottom: 1px solid #e5e7eb; font-size: 0.8rem; }
+                    tr:nth-child(even) td { background: #f8fafc; }
+                    tfoot td { background: #dbeafe !important; font-weight: 700; color: #1e40af; }
+                    .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 100px; font-weight: 700; font-size: 0.72rem; }
+                    .badge-paid { background: #dcfce7; color: #15803d; }
+                    .badge-unpaid { background: #fee2e2; color: #b91c1c; }
+                    .grade-pass { color: #15803d; font-weight: 700; }
+                    .grade-fail { color: #b91c1c; font-weight: 700; }
+                    .grade-lock { color: #9ca3af; }
+                    .print-footer { margin-top: 2rem; font-size: 0.75rem; color: #9ca3af; text-align: right; }
+                    @media print { body { padding: 0; } }
+                </style>
+            </head>
+            <body>
+                <div class="print-header">
+                    <div class="school">Laguna College of Criminology (LCC)</div>
+                    <h1>${title}</h1>
+                    <p>${sub}</p>
+                    <p>Printed: ${new Date().toLocaleString('en-PH', { dateStyle: 'long', timeStyle: 'short' })}</p>
+                </div>
+                ${tableEl.outerHTML}
+                <div class="print-footer">Generated by LCC Registrar Portal &mdash; For official use only.</div>
+            </body>
+            </html>
+        `);
+        printWin.document.close();
+        printWin.focus();
+        setTimeout(() => printWin.print(), 400);
     }
 
     // ==========================================

@@ -43,7 +43,7 @@
         <div class="sidebar-user">
             <div class="sidebar-avatar admin-av">A</div>
             <div class="sidebar-user-info">
-                <span class="sidebar-user-name">System Admin</span>
+                <span class="sidebar-user-name">Registrar</span>
                 <span class="sidebar-user-role">Administrator</span>
             </div>
         </div>
@@ -67,6 +67,10 @@
                 <span class="sidebar-link-icon">&#128193;</span>
                 Sections
             </a>
+            <a href="#" class="sidebar-link" data-target="grades-view" data-title="Grade Reports" data-subtitle="View student grades, GWA, and payment status">
+                <span class="sidebar-link-icon">&#128202;</span>
+                Grades
+            </a>
             
             <span class="nav-section-label mt-auto">Account</span>
             <a href="login.html" class="sidebar-link logout-link">
@@ -82,7 +86,7 @@
             <div class="header-left">
                 <button class="sidebar-toggle">&#9776;</button>
                 <div>
-                    <h1 class="page-title" id="page-title">Admin Dashboard</h1>
+                    <h1 class="page-title" id="page-title">Registrar Dashboard</h1>
                     <p class="page-subtitle" id="page-subtitle">System Overview</p>
                 </div>
             </div>
@@ -238,6 +242,73 @@
                     </div>
                 </div>
             </div> 
+
+            <!-- ============================================================
+                 GRADES VIEW — Read-only. Admin monitors only.
+                 ============================================================ -->
+            <div id="grades-view" class="view-section hidden">
+
+                <!-- Info notice -->
+                <div class="notice-bar notice-bar-info" style="display:flex;align-items:flex-start;gap:0.75rem;">
+                    <span style="font-size:1.1rem;flex-shrink:0;">ℹ️</span>
+                    <span>This is a <strong>read-only</strong> view. Grades are entered by faculty teachers. Payment status is monitored here — update it from the Students page. GWA is automatically computed from Final Ratings.</span>
+                </div>
+
+                <!-- Filter bar -->
+                <div class="filter-bar" id="grades-filter-bar">
+                    <span class="filter-label">Section:</span>
+                    <select class="filter-select" id="admin-grades-section-select">
+                        <option value="">— Select a Section —</option>
+                    </select>
+                    <span class="filter-label" style="margin-left:0.5rem;">Subject:</span>
+                    <select class="filter-select" id="admin-grades-subject-select">
+                        <option value="">— All Subjects —</option>
+                    </select>
+                    <button type="button" class="btn-save" id="btn-print-grades" onclick="adminApp.printGradeReport()" style="margin-left:auto;display:flex;align-items:center;gap:0.4rem;">
+                        🖨️ Print Report
+                    </button>
+                </div>
+
+                <!-- Grade report panel -->
+                <div class="panel" id="admin-grades-panel">
+                    <div class="panel-header">
+                        <div>
+                            <h3 class="panel-title" id="admin-grades-panel-title">Grade Report</h3>
+                            <p class="panel-subtitle" id="admin-grades-panel-sub">Select a section above to load grades</p>
+                        </div>
+                        <span class="panel-meta-count" id="admin-grades-count">—</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="table-scroll-wrapper">
+                            <table class="data-table" id="admin-grades-table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Student ID</th>
+                                        <th>Full Name</th>
+                                        <th>Payment</th>
+                                        <th>Prelim</th>
+                                        <th>Midterm</th>
+                                        <th>Final</th>
+                                        <th>Final Rating</th>
+                                        <th>Remarks</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-grades-tbody">
+                                    <tr>
+                                        <td colspan="9" style="text-align:center;color:var(--gray-400);padding:2.5rem;font-size:0.88rem;">
+                                            Select a section from the filter above to view grades.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <tfoot id="admin-grades-tfoot"></tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
     </main>
 </div>
 

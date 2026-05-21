@@ -70,15 +70,16 @@ class DashboardController {
             .eq('id', user.id)
             .single();
             
-        if(profile) {
+        if (profile) {
             document.querySelectorAll('.info-name, .header-user-name, .sidebar-user-name').forEach(el => el.textContent = profile.full_name);
         }
 
-        // 3. Fetch Grades
+        // 3. Fetch Grades — includes prelim/midterm/final/final_rating per period
         const { data: records, error } = await window.supabase
             .from('records')
             .select(`
-                grade, status,
+                status,
+                prelim, midterm, final, final_rating,
                 sections ( semester, subjects (code, title, units) )
             `)
             .eq('student_id', user.id);
@@ -89,43 +90,83 @@ class DashboardController {
     }
 
     renderGrades(records) {
-        const tbody = document.querySelector('#grades-view .data-table tbody');
+        // If Supabase returns no data, keep the hardcoded sample rows visible
+        if (!records || records.length === 0) return;
+
+        const tbody = document.querySelector('#grades-table tbody');
+        const tfoot = document.getElementById('grades-tfoot');
         if (!tbody) return;
 
         tbody.innerHTML = '';
-        let totalUnits = 0;
-        let gradeSum = 0;
-        let count = 0;
+        let releasedCount = 0;
+        let gwaSum = 0;
+        let gwaCount = 0;
+
+        // Helper: format a grade value safely
+        const fmt = (val) => {
+            if (val === null || val === undefined || val === '') return '--';
+            const n = parseFloat(val);
+            return isNaN(n) ? '--' : n.toFixed(2);
+        };
 
         records.forEach(record => {
-            const subject = record.sections.subjects;
+            const subject   = record.sections.subjects;
             const isUnlocked = record.status === 'Unlocked';
-            const displayGrade = isUnlocked && record.grade ? record.grade : '--';
-            
-            // FIX: Prevent NaN cascade if record.grade is missing/invalid
-            if (isUnlocked && record.grade) {
-                const parsedGrade = parseFloat(record.grade);
-                if (!isNaN(parsedGrade)) {
-                    totalUnits += subject.units;
-                    gradeSum += parsedGrade;
-                    count++;
+
+            const prelim      = isUnlocked ? fmt(record.prelim)        : '--';
+            const midterm     = isUnlocked ? fmt(record.midterm)       : '--';
+            const final       = isUnlocked ? fmt(record.final)         : '--';
+            const finalRating = isUnlocked ? fmt(record.final_rating)  : '--';
+
+            if (isUnlocked) {
+                releasedCount++;
+                const fr = parseFloat(record.final_rating);
+                if (!isNaN(fr)) {
+                    gwaSum += fr;
+                    gwaCount++;
                 }
             }
+
+            const gradeClass   = isUnlocked ? 'grade-high'  : 'grade-locked';
+            const badgeClass   = isUnlocked ? 'unlocked'    : 'locked';
+            const badgeLabel   = isUnlocked ? 'Released'    : 'Locked';
 
             tbody.innerHTML += `
                 <tr>
                     <td><span class="subject-code">${subject.code}</span></td>
                     <td>${subject.title}</td>
-                    <td><span class="grade-pill ${isUnlocked ? 'grade-high' : 'grade-locked'}">${displayGrade}</span></td>
-                    <td><span class="access-badge ${isUnlocked ? 'unlocked' : 'locked'}">${isUnlocked ? 'Unlocked' : 'Locked by Teacher'}</span></td>
+                    <td>${subject.units}</td>
+                    <td><span class="grade-pill ${gradeClass}">${prelim}</span></td>
+                    <td><span class="grade-pill ${gradeClass}">${midterm}</span></td>
+                    <td><span class="grade-pill ${gradeClass}">${final}</span></td>
+                    <td><span class="grade-pill ${isUnlocked && finalRating !== '--' ? 'grade-high' : 'grade-locked'}">${finalRating}</span></td>
+                    <td><span class="access-badge ${badgeClass}">${badgeLabel}</span></td>
                 </tr>
             `;
         });
 
-        // Update GWA Card
-        const gwa = count > 0 ? (gradeSum / count).toFixed(2) : 'N/A';
-        const gwaCard = document.querySelector('#student-dashboard-view .stat-card.blue .stat-card-value');
-        if(gwaCard) gwaCard.textContent = gwa;
+        // GWA
+        const gwa = gwaCount > 0 ? (gwaSum / gwaCount).toFixed(2) : 'N/A';
+
+        // Update GWA stat cards (dashboard view + grades view)
+        document.querySelectorAll('#student-dashboard-view .stat-card.blue .stat-card-value, #grades-gwa-value').forEach(el => {
+            el.textContent = gwa;
+        });
+
+        // Update released count badge
+        const releasedEl = document.getElementById('grades-released-count');
+        if (releasedEl) releasedEl.textContent = releasedCount;
+
+        // Render tfoot GWA row
+        if (tfoot) {
+            tfoot.innerHTML = `
+                <tr class="tfoot-bg">
+                    <td colspan="6" class="tfoot-label">General Weighted Average (GWA)</td>
+                    <td class="tfoot-value"><strong>${gwa}</strong></td>
+                    <td></td>
+                </tr>
+            `;
+        }
     }
 }
 

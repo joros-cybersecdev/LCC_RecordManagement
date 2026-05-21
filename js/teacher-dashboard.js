@@ -34,7 +34,7 @@ class TeacherDashboardController {
         const { data: records, error } = await window.supabase
             .from('records')
             .select(`
-                id, grade, status, payment_status,
+                id, prelim, midterm, final, final_rating, status, payment_status,
                 profiles ( full_name, school_id )
             `)
             .eq('section_id', sectionId);
@@ -46,26 +46,36 @@ class TeacherDashboardController {
 
     renderGradeTable(records) {
         const tbody = document.querySelector('#grades-view .data-table tbody');
-        if (!tbody) return;
+        if (!tbody || !records || records.length === 0) return;
+
+        const fmt = (val) => {
+            if (val === null || val === undefined || val === '') return '';
+            const n = parseFloat(val);
+            return isNaN(n) ? '' : n.toFixed(2);
+        };
 
         tbody.innerHTML = '';
         records.forEach((record, index) => {
-            const isLocked = record.status === 'Locked';
-            
-            // FIX: Removed inline style on the button, replaced with class 'btn-toggle-small'
+            const isPaid     = record.payment_status === 'Paid';
+            const fr         = fmt(record.final_rating);
+            const frDisplay  = fr
+                ? `<input type="number" class="grade-input" value="${fr}" step="0.25" min="1.00" max="5.00" readonly style="background:#f0fdf4;font-weight:700;color:#15803d;">`
+                : `<input type="number" class="grade-input" value="" step="0.25" min="1.00" max="5.00" placeholder="—" readonly style="background:#f9fafb;">`;
+            const remarks    = fr
+                ? `<span class="grade-pill grade-high">Passed</span>`
+                : `<span class="empty-grade-text">No grade yet</span>`;
+
             tbody.innerHTML += `
                 <tr>
                     <td>${index + 1}</td>
                     <td><span class="subject-code">${record.profiles.school_id}</span></td>
                     <td>${record.profiles.full_name}</td>
-                    <td><span class="access-badge ${record.payment_status === 'Paid' ? 'unlocked' : 'locked'}">${record.payment_status}</span></td>
-                    <td>
-                        <input type="number" class="grade-input" id="grade-${record.id}" value="${record.grade || ''}" step="0.25" min="1.00" max="5.00" onblur="teacherApp.updateGrade('${record.id}', this.value)">
-                    </td>
-                    <td>
-                        <span class="access-status-label ${isLocked ? 'status-locked' : 'status-unlocked'}">${record.status}</span>
-                        <button class="btn-toggle-small" onclick="teacherApp.toggleSingleGrade('${record.id}', '${isLocked ? 'Unlocked' : 'Locked'}')">Toggle</button>
-                    </td>
+                    <td><span class="access-badge ${isPaid ? 'unlocked' : 'locked'}">${record.payment_status}</span></td>
+                    <td><input type="number" class="grade-input" id="prelim-${record.id}" value="${fmt(record.prelim)}" step="0.25" min="1.00" max="5.00" placeholder="—" onblur="teacherApp.updateGradeField('${record.id}', 'prelim', this.value)"></td>
+                    <td><input type="number" class="grade-input" id="midterm-${record.id}" value="${fmt(record.midterm)}" step="0.25" min="1.00" max="5.00" placeholder="—" onblur="teacherApp.updateGradeField('${record.id}', 'midterm', this.value)"></td>
+                    <td><input type="number" class="grade-input" id="final-${record.id}" value="${fmt(record.final)}" step="0.25" min="1.00" max="5.00" placeholder="—" onblur="teacherApp.updateGradeField('${record.id}', 'final', this.value)"></td>
+                    <td>${frDisplay}</td>
+                    <td>${remarks}</td>
                 </tr>
             `;
         });
@@ -75,11 +85,14 @@ class TeacherDashboardController {
     // SUPABASE UPDATES
     // ==========================================
 
-    async updateGrade(recordId, newGrade) {
-        if (!newGrade) return;
+    async updateGradeField(recordId, field, value) {
+        if (!value) return;
+        const parsed = parseFloat(value);
+        if (isNaN(parsed)) return;
+
         const { error } = await window.supabase
             .from('records')
-            .update({ grade: parseFloat(newGrade) })
+            .update({ [field]: parsed })
             .eq('id', recordId);
 
         if (error) alert('Error saving grade: ' + error.message);
