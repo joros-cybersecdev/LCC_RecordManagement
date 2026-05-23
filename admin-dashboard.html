@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LCC Admin Portal</title>
+    <title>La Consolacion College Admin Portal</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="css/lcc-style.css">
@@ -35,7 +35,7 @@
         <div class="sidebar-brand">
             <div class="sidebar-brand-logo">LCC</div>
             <div class="sidebar-brand-text">
-                <span class="sidebar-brand-name">LCC Portal</span>
+                <span class="sidebar-brand-name">La Consolacion College Portal</span>
                 <span class="sidebar-brand-sub">Registar Portal</span>
             </div>
         </div>
@@ -206,6 +206,7 @@
                                     <th>Full Name</th>
                                     <th>Email Address</th>
                                     <th>Department</th>
+                                    <th>Assigned Subjects</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -251,42 +252,53 @@
                 <!-- Info notice -->
                 <div class="notice-bar notice-bar-info" style="display:flex;align-items:flex-start;gap:0.75rem;">
                     <span style="font-size:1.1rem;flex-shrink:0;">ℹ️</span>
-                    <span>This is a <strong>read-only</strong> view. Grades are entered by faculty teachers. Payment status is monitored here — update it from the Students page. GWA is automatically computed from Final Ratings.</span>
+                    <span>This is a <strong>read-only</strong> view. Grades are entered by faculty teachers. GWA is automatically computed from Final Ratings.</span>
                 </div>
 
                 <!-- Filter bar -->
                 <div class="filter-bar" id="grades-filter-bar">
-                    <span class="filter-label">Section:</span>
-                    <select class="filter-select" id="admin-grades-section-select">
-                        <option value="">— Select a Section —</option>
+                    <span class="filter-label">Student:</span>
+                    <select class="filter-select" id="admin-grades-student-select">
+                        <option value="pepanio" selected>Pepanio, Carl Jhustine S. — 2026-001201</option>
+                        <option value="saltat">Saltat, John Joros D. — 2026-001202</option>
+                        <option value="reyes">Reyes, Maria Angela B. — 2026-001203</option>
+                        <option value="cruz">Cruz, James Patrick O. — 2026-001205</option>
                     </select>
-                    <span class="filter-label" style="margin-left:0.5rem;">Subject:</span>
-                    <select class="filter-select" id="admin-grades-subject-select">
-                        <option value="">— All Subjects —</option>
+                    <span class="filter-label" style="margin-left:0.5rem;">School Year:</span>
+                    <select class="filter-select">
+                        <option>2025–2026 • 2nd Semester</option>
                     </select>
-                    <button type="button" class="btn-save" id="btn-print-grades" onclick="adminApp.printGradeReport()" style="margin-left:auto;display:flex;align-items:center;gap:0.4rem;">
+                    <button type="button" class="btn-save" id="btn-print-grades" onclick="window.print()" style="margin-left:auto;display:flex;align-items:center;gap:0.4rem;">
                         🖨️ Print Report
                     </button>
                 </div>
 
-                <!-- Grade report panel -->
-                <div class="panel" id="admin-grades-panel">
-                    <div class="panel-header">
-                        <div>
-                            <h3 class="panel-title" id="admin-grades-panel-title">Grade Report</h3>
-                            <p class="panel-subtitle" id="admin-grades-panel-sub">Select a section above to load grades</p>
+                <!-- Student Info Card -->
+                <div class="panel" style="padding:0;overflow:hidden;">
+                    <div style="background:linear-gradient(135deg,#0f766e,#134e4a);padding:1.5rem 1.75rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+                        <div style="display:flex;align-items:center;gap:1rem;">
+                            <div style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:800;color:#fff;flex-shrink:0;">C</div>
+                            <div>
+                                <div style="font-size:1.1rem;font-weight:800;color:#fff;letter-spacing:-0.02em;">Pepanio, Carl Jhustine S.</div>
+                                <div style="font-size:0.78rem;color:rgba(255,255,255,0.7);margin-top:0.2rem;">2026-001201 &nbsp;•&nbsp; BSIT &nbsp;•&nbsp; 3rd Year &nbsp;•&nbsp; Section A</div>
+                            </div>
                         </div>
-                        <span class="panel-meta-count" id="admin-grades-count">—</span>
+                        <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
+                            <span style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);color:#fff;padding:0.35rem 0.9rem;border-radius:100px;font-size:0.78rem;font-weight:700;">2025–2026 • 2nd Semester</span>
+                            <span class="access-badge unlocked" style="font-size:0.78rem;">✓ Paid</span>
+                        </div>
                     </div>
-                    <div class="panel-body">
+
+                    <!-- Grade Table -->
+                    <div class="panel-body" style="padding:0;">
                         <div class="table-scroll-wrapper">
                             <table class="data-table" id="admin-grades-table">
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Student ID</th>
-                                        <th>Full Name</th>
-                                        <th>Payment</th>
+                                        <th>Subject Code</th>
+                                        <th>Subject Title</th>
+                                        <th>Units</th>
                                         <th>Prelim</th>
                                         <th>Midterm</th>
                                         <th>Final</th>
@@ -296,12 +308,79 @@
                                 </thead>
                                 <tbody id="admin-grades-tbody">
                                     <tr>
-                                        <td colspan="9" style="text-align:center;color:var(--gray-400);padding:2.5rem;font-size:0.88rem;">
-                                            Select a section from the filter above to view grades.
-                                        </td>
+                                        <td>1</td>
+                                        <td><span class="subject-code">IT 301</span></td>
+                                        <td>Web Development</td>
+                                        <td>3</td>
+                                        <td><span class="grade-pill grade-high">1.50</span></td>
+                                        <td><span class="grade-pill grade-high">1.75</span></td>
+                                        <td><span class="grade-pill grade-high">1.50</span></td>
+                                        <td><span class="grade-pill grade-high">1.58</span></td>
+                                        <td><span class="grade-pill grade-high">Passed</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td><span class="subject-code">IT 302</span></td>
+                                        <td>Database Management Systems</td>
+                                        <td>3</td>
+                                        <td><span class="grade-pill grade-high">1.25</span></td>
+                                        <td><span class="grade-pill grade-high">1.50</span></td>
+                                        <td><span class="grade-pill grade-high">1.25</span></td>
+                                        <td><span class="grade-pill grade-high">1.33</span></td>
+                                        <td><span class="grade-pill grade-high">Passed</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>3</td>
+                                        <td><span class="subject-code">IT 303</span></td>
+                                        <td>Systems Analysis and Design</td>
+                                        <td>3</td>
+                                        <td><span class="grade-pill grade-high">1.75</span></td>
+                                        <td><span class="grade-pill grade-high">1.75</span></td>
+                                        <td><span class="grade-pill grade-high">1.50</span></td>
+                                        <td><span class="grade-pill grade-high">1.67</span></td>
+                                        <td><span class="grade-pill grade-high">Passed</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>4</td>
+                                        <td><span class="subject-code">IT 304</span></td>
+                                        <td>Human Computer Interaction</td>
+                                        <td>3</td>
+                                        <td><span class="grade-pill grade-high">2.00</span></td>
+                                        <td><span class="grade-pill grade-high">1.75</span></td>
+                                        <td><span class="grade-pill grade-high">1.75</span></td>
+                                        <td><span class="grade-pill grade-high">1.83</span></td>
+                                        <td><span class="grade-pill grade-high">Passed</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>5</td>
+                                        <td><span class="subject-code">GE 101</span></td>
+                                        <td>Purposive Communication</td>
+                                        <td>3</td>
+                                        <td><span class="grade-pill grade-high">1.50</span></td>
+                                        <td><span class="grade-pill grade-high">1.50</span></td>
+                                        <td><span class="grade-pill grade-high">1.25</span></td>
+                                        <td><span class="grade-pill grade-high">1.42</span></td>
+                                        <td><span class="grade-pill grade-high">Passed</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>6</td>
+                                        <td><span class="subject-code">PE 201</span></td>
+                                        <td>Physical Education 2</td>
+                                        <td>2</td>
+                                        <td><span class="grade-pill grade-high">1.25</span></td>
+                                        <td><span class="grade-pill grade-high">1.25</span></td>
+                                        <td><span class="grade-pill grade-high">1.25</span></td>
+                                        <td><span class="grade-pill grade-high">1.25</span></td>
+                                        <td><span class="grade-pill grade-high">Passed</span></td>
                                     </tr>
                                 </tbody>
-                                <tfoot id="admin-grades-tfoot"></tfoot>
+                                <tfoot id="admin-grades-tfoot">
+                                    <tr class="tfoot-bg">
+                                        <td colspan="7" style="text-align:right;padding:0.85rem 1rem;font-weight:700;color:var(--gray-700);">General Weighted Average (GWA)</td>
+                                        <td style="padding:0.85rem 1rem;font-weight:800;color:#15803d;font-size:1rem;">1.51</td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
                             </table>
                         </div>
                     </div>
@@ -846,6 +925,56 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     ASSIGN TEACHER MODAL — Subject + Section Assignment
+     ============================================================ -->
+<div class="modal-overlay" id="assignTeacherModal">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <h3 class="modal-title">Assign Subject &amp; Section</h3>
+            <button class="modal-close modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+
+            <!-- Teacher identity (read-only banner) -->
+            <div id="assign-teacher-banner" style="display:flex;align-items:center;gap:0.9rem;background:linear-gradient(135deg,#0f766e,#134e4a);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.25rem;">
+                <div id="assign-teacher-avatar" style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:800;color:#fff;flex-shrink:0;">T</div>
+                <div>
+                    <div id="assign-teacher-name" style="font-size:1rem;font-weight:800;color:#fff;letter-spacing:-0.01em;">Teacher Name</div>
+                    <div id="assign-teacher-meta" style="font-size:0.76rem;color:rgba(255,255,255,0.65);margin-top:0.15rem;">Department</div>
+                </div>
+            </div>
+            <input type="hidden" id="assign-teacher-id">
+
+            <h4 class="modal-section-heading">📚 New Assignment</h4>
+
+            <div class="form-row">
+                <div class="admin-form-group">
+                    <label class="admin-label">Subject <span style="color:#dc2626">*</span></label>
+                    <select id="assign-subject-select" class="admin-input">
+                        <option value="" disabled selected>Loading subjects…</option>
+                    </select>
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-label">Section <span style="color:#dc2626">*</span></label>
+                    <select id="assign-section-select" class="admin-input">
+                        <option value="" disabled selected>Loading sections…</option>
+                    </select>
+                </div>
+            </div>
+
+            <h4 class="modal-section-heading">📋 Current Assignments</h4>
+            <div id="assign-current-list" style="min-height:60px;">
+                <div style="text-align:center;color:var(--gray-400);font-size:0.84rem;padding:1.25rem 0;">Loading current assignments…</div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel modal-close-btn">Cancel</button>
+            <button class="btn-submit" id="btn-confirm-assign">Add Subject</button>
         </div>
     </div>
 </div>

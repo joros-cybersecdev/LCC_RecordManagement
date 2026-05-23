@@ -82,6 +82,12 @@ class AdminDashboardController {
         if (btnUpdateStudent) {
             btnUpdateStudent.addEventListener('click', () => this.handleUpdateStudent());
         }
+
+        // 5. ASSIGN TEACHER → Subject + Section
+        const btnConfirmAssign = document.getElementById('btn-confirm-assign');
+        if (btnConfirmAssign) {
+            btnConfirmAssign.addEventListener('click', () => this.handleAssignTeacher());
+        }
     }
 
     // ==========================================
@@ -382,25 +388,295 @@ class AdminDashboardController {
 
         tbody.innerHTML = '';
         if (!teachers || teachers.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--gray-400);padding:2rem;font-size:0.88rem;">No teachers added yet. Click "+ Add Teacher" to get started.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--gray-400);padding:2rem;font-size:0.88rem;">No teachers added yet. Click "+ Add Teacher" to get started.</td></tr>`;
             return;
         }
 
+        // Fetch all teacher_assignments to build per-teacher count badge
+        const { data: allAssignments } = await window.supabase
+            .from('teacher_assignments')
+            .select('teacher_id, subjects(code), sections(section_name)');
+
+        const assignMap = {};
+        (allAssignments || []).forEach(a => {
+            if (!assignMap[a.teacher_id]) assignMap[a.teacher_id] = [];
+            assignMap[a.teacher_id].push(a);
+        });
+
         teachers.forEach(teacher => {
+            const assignments = assignMap[teacher.id] || [];
+            const countBadge = assignments.length > 0
+                ? `<span style="display:inline-flex;align-items:center;gap:0.3rem;background:#dcfce7;color:#15803d;font-size:0.73rem;font-weight:700;padding:0.22rem 0.6rem;border-radius:100px;">${assignments.length} subject${assignments.length > 1 ? 's' : ''}</span>`
+                : `<span style="font-size:0.78rem;color:var(--gray-400);">None assigned</span>`;
+
             tbody.innerHTML += `
                 <tr>
                     <td><span class="subject-code">${teacher.school_id}</span></td>
                     <td>${teacher.full_name}</td>
                     <td>${teacher.email || teacher.school_id + '@lcc.edu'}</td>
                     <td>${teacher.department || '—'}</td>
+                    <td>${countBadge}</td>
                     <td class="text-right">
                         <div class="action-btns justify-end">
+                            <button class="btn-action btn-grades"
+                                onclick="adminApp.openAssignTeacherModal('${teacher.id}', '${(teacher.full_name||'').replace(/'/g,"\\'")}', '${(teacher.department||'').replace(/'/g,"\\'")}')">
+                                Assign
+                            </button>
                             <button class="btn-delete" onclick="adminApp.deleteProfile('${teacher.id}')">Delete</button>
                         </div>
                     </td>
                 </tr>
             `;
         });
+    }
+
+    // ==========================================
+    // OPEN ASSIGN TEACHER MODAL
+    // ==========================================
+
+    async openAssignTeacherModal(teacherId, teacherName, department) {
+        // Set banner info
+        const initials = teacherName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+        const avatarEl = document.getElementById('assign-teacher-avatar');
+        const nameEl   = document.getElementById('assign-teacher-name');
+        const metaEl   = document.getElementById('assign-teacher-meta');
+        const idEl     = document.getElementById('assign-teacher-id');
+
+        if (avatarEl) avatarEl.textContent = initials || 'T';
+        if (nameEl)   nameEl.textContent   = teacherName;
+        if (metaEl)   metaEl.textContent   = department || 'No department set';
+        if (idEl)     idEl.value           = teacherId;
+
+        // Populate subject dropdown from Supabase
+        await this._populateAssignSubjectDropdown();
+        // Populate section dropdown from Supabase
+        await this._populateAssignSectionDropdown();
+        // Load current assignments
+        await this.loadTeacherAssignments(teacherId);
+
+        this.openModal('assignTeacherModal');
+    }
+
+    async _populateAssignSubjectDropdown() {
+        const sel = document.getElementById('assign-subject-select');
+        if (!sel) return;
+        sel.innerHTML = '<option value="" disabled selected>Loading…</option>';
+
+        // Strategy 1: try standalone subjects table
+        let { data: subjects } = await window.supabase
+            .from('subjects')
+            .select('id, code, title')
+            .order('code');
+
+        // Strategy 2: if subjects table empty/missing, extract unique subjects from sections
+        if (!subjects || subjects.length === 0) {
+            const { data: sections } = await window.supabase
+                .from('sections')
+                .select('subject_id, subjects(id, code, title)')
+                .not('subject_id', 'is', null);
+
+            if (sections && sections.length > 0) {
+                const seen = new Set();
+                subjects = [];
+                sections.forEach(s => {
+                    if (s.subjects && !seen.has(s.subjects.id)) {
+                        seen.add(s.subjects.id);
+                        subjects.push(s.subjects);
+                    }
+                });
+            }
+        }
+
+        // Strategy 3: hardcoded fallback list so the modal is never empty
+        if (!subjects || subjects.length === 0) {
+            const fallback = [
+                { id: 'IT301', code: 'IT 301', title: 'Web Development II' },
+                { id: 'IT302', code: 'IT 302', title: 'Database Management Systems' },
+                { id: 'IT303', code: 'IT 303', title: 'Systems Integration and Architecture' },
+                { id: 'IT304', code: 'IT 304', title: 'Advanced Database Systems' },
+                { id: 'CS101', code: 'CS 101', title: 'Introduction to Computing' },
+                { id: 'GE101', code: 'GE 101', title: 'Purposive Communication' },
+                { id: 'PE201', code: 'PE 201', title: 'Physical Education 2' },
+                { id: 'MATH101', code: 'MATH 101', title: 'Mathematics in the Modern World' },
+            ];
+            sel.innerHTML = '<option value="" disabled selected>Choose a subject…</option>';
+            fallback.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = `${s.code} — ${s.title}`;
+                sel.appendChild(opt);
+            });
+            return;
+        }
+
+        sel.innerHTML = '<option value="" disabled selected>Choose a subject…</option>';
+        subjects.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s.id;
+            opt.textContent = `${s.code} — ${s.title}`;
+            sel.appendChild(opt);
+        });
+    }
+
+    async _populateAssignSectionDropdown() {
+        const sel = document.getElementById('assign-section-select');
+        if (!sel) return;
+        sel.innerHTML = '<option value="" disabled selected>Loading…</option>';
+
+        const { data: sections } = await window.supabase
+            .from('sections')
+            .select('id, section_name, school_year, semester')
+            .order('section_name');
+
+        // Fallback hardcoded sections if table is empty
+        if (!sections || sections.length === 0) {
+            const fallback = [
+                { id: 'BSIT-1A', section_name: 'BSIT-1A', school_year: '2025-2026', semester: '2nd Semester' },
+                { id: 'BSIT-2A', section_name: 'BSIT-2A', school_year: '2025-2026', semester: '2nd Semester' },
+                { id: 'BSIT-3A', section_name: 'BSIT-3A', school_year: '2025-2026', semester: '2nd Semester' },
+                { id: 'BSIT-3B', section_name: 'BSIT-3B', school_year: '2025-2026', semester: '2nd Semester' },
+                { id: 'BSCS-1A', section_name: 'BSCS-1A', school_year: '2025-2026', semester: '2nd Semester' },
+                { id: 'BSHM-1A', section_name: 'BSHM-1A', school_year: '2025-2026', semester: '2nd Semester' },
+                { id: 'BSBA-1A', section_name: 'BSBA-1A', school_year: '2025-2026', semester: '2nd Semester' },
+            ];
+            sel.innerHTML = '<option value="" disabled selected>Choose a section…</option>';
+            fallback.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = `${s.section_name} · ${s.school_year} · ${s.semester}`;
+                sel.appendChild(opt);
+            });
+            return;
+        }
+
+        sel.innerHTML = '<option value="" disabled selected>Choose a section…</option>';
+        sections.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s.id;
+            opt.textContent = `${s.section_name}${s.school_year ? ' · ' + s.school_year : ''}${s.semester ? ' · ' + s.semester : ''}`;
+            sel.appendChild(opt);
+        });
+    }
+
+    async loadTeacherAssignments(teacherId) {
+        const container = document.getElementById('assign-current-list');
+        if (!container) return;
+        container.innerHTML = `<div style="text-align:center;color:var(--gray-400);font-size:0.84rem;padding:1rem 0;">Loading…</div>`;
+
+        const { data: assignments, error } = await window.supabase
+            .from('teacher_assignments')
+            .select('id, subjects(code, title), sections(section_name, school_year, semester)')
+            .eq('teacher_id', teacherId);
+
+        if (error) {
+            container.innerHTML = `<div style="color:#dc2626;font-size:0.82rem;">Error loading assignments: ${error.message}</div>`;
+            return;
+        }
+
+        if (!assignments || assignments.length === 0) {
+            container.innerHTML = `<div style="text-align:center;color:var(--gray-400);font-size:0.84rem;padding:1.25rem 0;">No subjects assigned yet.</div>`;
+            return;
+        }
+
+        container.innerHTML = `
+            <div class="table-scroll-wrapper">
+                <table class="data-table" style="margin:0;">
+                    <thead>
+                        <tr>
+                            <th>Subject Code</th>
+                            <th>Subject Title</th>
+                            <th>Section</th>
+                            <th class="text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${assignments.map(a => `
+                            <tr>
+                                <td><span class="subject-code">${a.subjects?.code || '—'}</span></td>
+                                <td>${a.subjects?.title || '—'}</td>
+                                <td>${a.sections?.section_name || '—'}${a.sections?.school_year ? ' · ' + a.sections.school_year : ''}</td>
+                                <td class="text-right">
+                                    <button class="btn-delete" style="font-size:0.75rem;padding:0.25rem 0.6rem;"
+                                        onclick="adminApp.removeTeacherAssignment('${a.id}', '${document.getElementById('assign-teacher-id')?.value}')">
+                                        Remove
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    async handleAssignTeacher() {
+        const btn       = document.getElementById('btn-confirm-assign');
+        const teacherId = document.getElementById('assign-teacher-id')?.value;
+        const subjectId = document.getElementById('assign-subject-select')?.value;
+        const sectionId = document.getElementById('assign-section-select')?.value;
+
+        if (!teacherId || !subjectId || !sectionId) {
+            return this.showModalError('assignTeacherModal', 'Please select both a subject and a section.');
+        }
+
+        this.setButtonLoading(btn, true, 'Adding…');
+
+        try {
+            // Check for duplicate assignment
+            const { data: existing } = await window.supabase
+                .from('teacher_assignments')
+                .select('id')
+                .eq('teacher_id', teacherId)
+                .eq('subject_id', subjectId)
+                .eq('section_id', sectionId)
+                .maybeSingle();
+
+            if (existing) {
+                this.showModalError('assignTeacherModal', 'This teacher is already assigned to that subject and section.');
+                return;
+            }
+
+            const { error } = await window.supabase.from('teacher_assignments').insert({
+                teacher_id: teacherId,
+                subject_id: subjectId,
+                section_id: sectionId,
+            });
+
+            if (error) throw error;
+
+            // Reset dropdowns and refresh list
+            document.getElementById('assign-subject-select').value = '';
+            document.getElementById('assign-section-select').value = '';
+            await this.loadTeacherAssignments(teacherId);
+            this.loadTeachers(); // refresh badge count in the table
+            this.showToast('✅ Subject assigned successfully!');
+
+            // Clear any prior error
+            const errEl = document.querySelector('#assignTeacherModal .modal-form-error');
+            if (errEl) errEl.remove();
+
+        } catch (err) {
+            this.showModalError('assignTeacherModal', 'Error: ' + err.message);
+        } finally {
+            this.setButtonLoading(btn, false, 'Add Subject');
+        }
+    }
+
+    async removeTeacherAssignment(assignmentId, teacherId) {
+        if (!confirm('Remove this subject assignment from the teacher?')) return;
+
+        const { error } = await window.supabase
+            .from('teacher_assignments')
+            .delete()
+            .eq('id', assignmentId);
+
+        if (error) {
+            this.showToast('❌ Failed to remove: ' + error.message);
+        } else {
+            this.showToast('Assignment removed.');
+            await this.loadTeacherAssignments(teacherId);
+            this.loadTeachers();
+        }
     }
 
     async loadSections() {
