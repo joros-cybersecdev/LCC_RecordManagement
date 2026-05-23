@@ -9,7 +9,6 @@ class TeacherDashboardController {
     }
 
     async init() {
-        // 1. Session check
         const sessionStr = localStorage.getItem('lcc_user');
         if (!sessionStr) return window.location.href = 'login.html';
         this.session = JSON.parse(sessionStr);
@@ -19,7 +18,6 @@ class TeacherDashboardController {
             return window.location.href = 'login.html';
         }
 
-        // 2. Fetch Profile
         const { data: profile } = await window.supabase
             .from('profiles')
             .select('*')
@@ -29,7 +27,6 @@ class TeacherDashboardController {
         if (!profile) return window.location.href = 'login.html';
         this.profile = profile;
 
-        // 3. Update DOM (Names & Avatars)
         const nameText = this.profile.full_name || 'Teacher';
         const initial = nameText.charAt(0).toUpperCase();
         
@@ -39,16 +36,13 @@ class TeacherDashboardController {
         const metaEl = document.querySelector('.info-meta');
         if (metaEl) metaEl.innerHTML = `${this.profile.department || 'Faculty'} &bull; Teacher`;
 
-        // 4. Fetch Sections
         await this.loadSections();
 
-        // 5. Render Everything
         await this.renderDashboardStats();
         this.renderSubjectsAtAGlance();
         this.renderSubjectDetailCards();
         this.initDropdowns();
         
-        // 6. Wire up static buttons
         const btnUnlockAll = document.getElementById('btn-unlock-all');
         const btnLockAll = document.getElementById('btn-lock-all');
         const btnSaveAccess = document.querySelector('#access-view .panel-footer .btn-save');
@@ -62,23 +56,55 @@ class TeacherDashboardController {
     }
 
     async loadSections() {
-        const { data: sections, error } = await window.supabase
-            .from('sections')
-            .select('id, section_name, program, year_level, semester, school_year, subjects(code, title, units)')
-            .eq('faculty_id', this.session.id);
-            
-        if (error) return this.showToast('Error loading sections');
-        
-        this.sections = sections || [];
-        if (this.sections.length > 0) {
-            this.currentSectionId = this.sections[0].id;
+        let courseMap = {};
+        const { data: coursesData } = await window.supabase.from('courses').select('code, name, id');
+        if (coursesData) {
+            coursesData.forEach(c => {
+                if (c.code) courseMap[c.code] = c.name;
+                if (c.id) courseMap[c.id] = c.name;
+            });
         }
+
+        // FIX APPLIED HERE: Added !sections_subject_id_fkey to disambiguate the foreign key
+        const { data: directSections, error: secError } = await window.supabase
+            .from('sections')
+            .select('id, section_name, program, year_level, semester, school_year, subjects!sections_subject_id_fkey(code, title, units)')
+            .eq('faculty_id', this.session.id);
+
+        if (secError) console.error("Error loading direct sections:", secError);
+
+        // FIX APPLIED HERE: Added !sections_subject_id_fkey to disambiguate the foreign key
+        const { data: assignments } = await window.supabase
+            .from('teacher_assignments')
+            .select('sections(id, section_name, program, year_level, semester, school_year, subjects!sections_subject_id_fkey(code, title, units))')
+            .eq('teacher_id', this.session.id);
+
+        const seen = new Set();
+        const merged = [];
+
+        (directSections || []).forEach(s => {
+            if (!seen.has(s.id)) { 
+                seen.add(s.id); 
+                s.course_full_name = courseMap[s.program] || s.program;
+                merged.push(s); 
+            }
+        });
+
+        (assignments || []).forEach(a => {
+            const s = a.sections;
+            if (s && !seen.has(s.id)) { 
+                seen.add(s.id); 
+                s.course_full_name = courseMap[s.program] || s.program;
+                merged.push(s); 
+            }
+        });
+
+        this.sections = merged;
+        if (this.sections.length > 0) this.currentSectionId = this.sections[0].id;
     }
 
     async renderDashboardStats() {
         const sectionIds = this.sections.map(s => s.id);
-        
-        // Update DOM elements for "My Subjects" immediately
         const statCards = document.querySelectorAll('#dashboard-view .stat-card-value');
         if (statCards.length >= 1) statCards[0].textContent = this.sections.length;
 
@@ -91,7 +117,6 @@ class TeacherDashboardController {
             return;
         }
 
-        // Fetch all records for this teacher's sections
         const { data: records, error } = await window.supabase
             .from('records')
             .select('*')
@@ -119,6 +144,11 @@ class TeacherDashboardController {
         const tbody = document.querySelector('#dashboard-view .data-table tbody');
         if (!tbody) return;
         
+        const ths = document.querySelectorAll('#dashboard-view .data-table thead th');
+        if (ths && ths.length > 4) {
+            ths[4].textContent = 'Course';
+        }
+        
         tbody.innerHTML = '';
         if (this.sections.length === 0) {
             tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--gray-400);padding:2rem;">No subjects assigned yet.</td></tr>`;
@@ -127,13 +157,15 @@ class TeacherDashboardController {
 
         this.sections.forEach(sec => {
             const subj = sec.subjects || {};
+            const courseName = sec.course_full_name || sec.program || '—';
+            
             tbody.innerHTML += `
                 <tr>
                     <td><span class="subject-code">${subj.code || '—'}</span></td>
                     <td>${subj.title || '—'}</td>
                     <td>${subj.units || '—'}</td>
                     <td>${sec.section_name}</td>
-                    <td>${sec.program || '—'}</td>
+                    <td>${courseName}</td>
                     <td>${sec.school_year || '—'}</td>
                 </tr>
             `;
@@ -152,6 +184,8 @@ class TeacherDashboardController {
 
         this.sections.forEach(sec => {
             const subj = sec.subjects || {};
+            const courseName = sec.course_full_name || sec.program || '—';
+            
             container.innerHTML += `
                 <div class="subject-detail-card">
                     <div class="sdc-header">
@@ -167,6 +201,10 @@ class TeacherDashboardController {
                         <div class="sdc-meta-item">
                             <span class="sdc-meta-label">Program</span>
                             <span class="sdc-meta-value">${sec.program || '—'}</span>
+                        </div>
+                        <div class="sdc-meta-item">
+                            <span class="sdc-meta-label">Course</span>
+                            <span class="sdc-meta-value">${courseName}</span>
                         </div>
                         <div class="sdc-meta-item">
                             <span class="sdc-meta-label">Year Level</span>
@@ -190,7 +228,6 @@ class TeacherDashboardController {
         const sidebarLink = document.querySelector(`.sidebar-link[data-target='${viewId}']`);
         if (sidebarLink) sidebarLink.click();
         
-        // Sync dropdowns
         const gradesDropdown = document.querySelector('#grades-view .filter-select');
         const accessDropdown = document.querySelector('#access-view .filter-select');
         
@@ -237,7 +274,6 @@ class TeacherDashboardController {
             });
         }
 
-        // Load initially
         if (this.currentSectionId) {
             this.loadGradeTable(this.currentSectionId);
             this.loadAccessTable(this.currentSectionId);
@@ -248,7 +284,6 @@ class TeacherDashboardController {
         const sec = this.sections.find(s => s.id === sectionId);
         if (!sec) return;
 
-        // Update headers
         const headerTitle = document.querySelector('#grades-view .panel-title');
         const headerSub = document.querySelector('#grades-view .panel-subtitle');
         if (headerTitle) headerTitle.textContent = `${sec.subjects?.code || ''} — ${sec.subjects?.title || ''}`;
@@ -257,16 +292,16 @@ class TeacherDashboardController {
         const tbody = document.querySelector('#grades-view .data-table tbody');
         if (!tbody) return;
         
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;">Loading students...</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2rem;">Loading students...</td></tr>`;
 
         const { data: records, error } = await window.supabase
             .from('records')
             .select('*, profiles(school_id, full_name)')
             .eq('section_id', sectionId)
-            .order('profiles(full_name)');
+            .order('student_id', { ascending: true });
 
         if (error || !records) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#dc2626;">Failed to load records.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#dc2626;">Failed to load records.</td></tr>`;
             return;
         }
 
@@ -274,7 +309,7 @@ class TeacherDashboardController {
         if (countLabel) countLabel.textContent = `${records.length} student(s)`;
 
         if (records.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--gray-400);padding:2rem;">No students enrolled in this section.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--gray-400);padding:2rem;">No students enrolled in this section.</td></tr>`;
             return;
         }
 
@@ -306,16 +341,13 @@ class TeacherDashboardController {
                         </div>
                     </td>
                     <td>
-                        <div style="display:flex;align-items:center;gap:0.75rem;">
-                            <input type="text" class="grade-input final-rating-display" value="${finalRating}" readonly style="width:65px;background:#f8fafc;font-weight:700;">
-                            ${remarksHtml}
-                        </div>
+                        <input type="text" class="grade-input final-rating-display" value="${finalRating}" readonly style="width:65px;background:#f8fafc;font-weight:700;color:#15803d;">
                     </td>
+                    <td>${remarksHtml}</td>
                 </tr>
             `;
         });
 
-        // Add blur listeners to inputs
         tbody.querySelectorAll('input[type="number"]').forEach(input => {
             input.addEventListener('blur', (e) => {
                 const recId = e.target.getAttribute('data-id');
@@ -332,7 +364,6 @@ class TeacherDashboardController {
             return this.showToast('❌ Invalid grade. Must be 1.00 - 5.00');
         }
 
-        // Update single field
         const { error } = await window.supabase
             .from('records')
             .update({ [field]: parsed })
@@ -340,7 +371,6 @@ class TeacherDashboardController {
 
         if (error) return this.showToast('❌ Failed to save grade');
 
-        // Check if all 3 are present to compute final rating
         const { data: rec } = await window.supabase
             .from('records')
             .select('prelim, midterm, final')
@@ -353,7 +383,6 @@ class TeacherDashboardController {
             
             await window.supabase.from('records').update({ final_rating: rounded }).eq('id', recordId);
             
-            // Optimistic DOM Update
             const row = document.querySelector(`tr[data-record-id="${recordId}"]`);
             if (row) {
                 const frInput = row.querySelector('.final-rating-display');
@@ -364,7 +393,7 @@ class TeacherDashboardController {
                     remarksEl.textContent = rounded <= 3.0 ? 'Passed' : 'Failed';
                 }
             }
-            this.renderDashboardStats(); // Update stat card silently
+            this.renderDashboardStats();
         }
         this.showToast(`✅ ${field.charAt(0).toUpperCase() + field.slice(1)} grade saved!`);
     }
@@ -387,7 +416,7 @@ class TeacherDashboardController {
             .from('records')
             .select('*, profiles(school_id, full_name)')
             .eq('section_id', sectionId)
-            .order('profiles(full_name)');
+            .order('student_id', { ascending: true });
 
         if (error || !records) {
             tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#dc2626;">Error loading access data.</td></tr>`;
@@ -432,13 +461,11 @@ class TeacherDashboardController {
             `;
         });
 
-        // Add toggle listeners
         tbody.querySelectorAll('.access-toggle').forEach(chk => {
             chk.addEventListener('change', async (e) => {
                 const recId = e.target.getAttribute('data-id');
                 const newStatus = e.target.checked ? 'Unlocked' : 'Locked';
                 
-                // Optimistic UI update
                 const label = e.target.closest('.toggle-wrapper').querySelector('.access-status-label');
                 label.className = `access-status-label status-${newStatus.toLowerCase()}`;
                 label.textContent = newStatus;
@@ -449,10 +476,10 @@ class TeacherDashboardController {
                     .eq('id', recId);
                     
                 if (error) {
-                    e.target.checked = !e.target.checked; // revert
+                    e.target.checked = !e.target.checked;
                     this.showToast('❌ Failed to update status');
                 } else {
-                    this.renderDashboardStats(); // refresh dashboard stats
+                    this.renderDashboardStats();
                 }
             });
         });
