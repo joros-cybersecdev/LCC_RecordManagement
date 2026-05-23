@@ -447,3 +447,220 @@
 
 /* Panel body zero-padding for table panels */
 .panel-body { padding: 0; }
+
+/* =========================================
+   MODAL REDESIGN CLASSES
+   ========================================= */
+
+/* Gradient Banners */
+.teacher-banner {
+    background: linear-gradient(135deg, #4f46e5, #312e81) !important;
+}
+.section-banner {
+    background: linear-gradient(135deg, #1d4ed8, #1e3a8a) !important;
+}
+
+/* View Modals (Full-bleed headers) */
+.view-modal-card {
+    padding: 0 !important;
+    overflow: hidden;
+    border-radius: 20px;
+    border: none;
+}
+
+.view-modal-header {
+    padding: 2.5rem 1.5rem 1.5rem;
+    text-align: center;
+    position: relative;
+}
+
+.view-modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: var(--white);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 1.25rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+.view-modal-close:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+.view-modal-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--white);
+    border: 2px solid rgba(255,255,255,0.25);
+    margin: 0 auto 0.85rem;
+}
+
+.view-modal-name {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--white);
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+}
+
+.view-modal-badge {
+    padding: 0.35rem 1.1rem;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: rgba(255,255,255,0.15);
+    color: var(--white);
+    border: 1px solid rgba(255,255,255,0.25);
+    display: inline-block;
+}
+
+.view-modal-body {
+    padding: 1.5rem;
+    background: var(--white);
+}
+
+/* Edit Modals (Compact colored headers) */
+.edit-modal-card {
+    padding: 0 !important;
+    overflow: hidden;
+    border-radius: 16px;
+    border: none;
+}
+
+.edit-modal-header {
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--white);
+}
+
+.edit-modal-header.teacher-bg { background: #4f46e5; }
+.edit-modal-header.section-bg { background: #2563eb; }
+
+.edit-modal-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+.edit-modal-body {
+    padding: 1.5rem;
+    background: var(--white);
+}
+
+.edit-modal-footer {
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    background: var(--gray-50);
+    border-top: 1px solid var(--gray-200);
+}
+
+/* Highlighted Count inside View Section Modal */
+.section-count-highlight {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1.5px solid #bfdbfe;
+    font-size: 1.4rem !important;
+    font-weight: 800 !important;
+    padding: 0.4rem 1rem;
+    border-radius: 12px;
+    display: inline-block;
+    min-width: 60px;
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+}
+
+/* Overriding JS Output for Teacher's Assigned Sections */
+#vt-sections-list .profile-card-row {
+    background: var(--white);
+    border: 1px solid var(--gray-200) !important;
+    border-radius: 10px;
+    padding: 0.85rem 1rem !important;
+    margin-bottom: 0.6rem;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s, border-color 0.2s;
+    border-bottom: 1px solid var(--gray-200) !important;
+}
+#vt-sections-list .profile-card-row:hover {
+    border-color: #c4b5fd !important;
+    background: #f5f3ff;
+    transform: translateY(-2px);
+}
+
+/* Labels with emojis */
+.pc-label-emoji {
+    font-size: 1.1em;
+    margin-right: 0.35rem;
+    vertical-align: text-bottom;
+}
+
+/* =========================================
+   TABLE ACTION BUTTONS (Row-level)
+   ========================================= */
+.action-btn-pill {
+    height: 28px;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    font-family: var(--font);
+}
+
+.btn-view-row {
+    background: #f0fdfa;
+    color: #0f766e;
+    border: 1px solid #99f6e4;
+}
+.btn-view-row:hover {
+    background: #0f766e;
+    color: #ffffff;
+    border-color: #0f766e;
+}
+
+.btn-edit-row {
+    background: #ede9fe;
+    color: #4338ca;
+    border: 1px solid #c4b5fd;
+}
+.btn-edit-row:hover {
+    background: #4338ca;
+    color: #ffffff;
+    border-color: #4338ca;
+}
+
+.btn-delete-row {
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+.btn-delete-row:hover {
+    background: #dc2626;
+    color: #ffffff;
+    border-color: #dc2626;
+}
