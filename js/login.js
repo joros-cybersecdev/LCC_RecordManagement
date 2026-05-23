@@ -1,3 +1,33 @@
+<<<<<<< HEAD
+=======
+/**
+ * Navigation Class
+ * Handles mobile menu toggling for the main portal.
+ */
+class Navigation {
+    constructor(buttonSelector, menuId) {
+        this.menuBtn = document.querySelector(buttonSelector);
+        this.mobileMenu = document.getElementById(menuId);
+
+        if (this.menuBtn && this.mobileMenu) {
+            this.initEvents();
+        }
+    }
+
+    initEvents() {
+        this.menuBtn.addEventListener('click', () => this.toggleMenu());
+    }
+
+    toggleMenu() {
+        this.mobileMenu.classList.toggle('open');
+    }
+}
+
+/**
+ * LoginForm Class
+ * Handles dynamic role selection, password visibility, and mock authentication.
+ */
+>>>>>>> 64f0e7796444bfe0753bc248abfcd40b316a9bce
 class LoginForm {
     constructor() {
         this.roleButtons = document.querySelectorAll('.role-btn');
@@ -7,6 +37,10 @@ class LoginForm {
         this.passwordInput = document.getElementById('password');
         this.togglePassBtn = document.querySelector('.toggle-pass');
         
+<<<<<<< HEAD
+=======
+        // Form elements for mock authentication
+>>>>>>> 64f0e7796444bfe0753bc248abfcd40b316a9bce
         this.loginForm = document.getElementById('loginForm');
         this.loginAlert = document.getElementById('loginAlert');
 
@@ -26,6 +60,11 @@ class LoginForm {
 
         if (this.togglePassBtn) {
             this.togglePassBtn.addEventListener('click', () => this.togglePassword());
+        }
+
+        // Bind form submission for mock authentication
+        if (this.loginForm) {
+            this.loginForm.addEventListener('submit', (e) => this.handleLogin(e));
         }
     }
 
@@ -54,6 +93,7 @@ class LoginForm {
         }
     }
 
+<<<<<<< HEAD
     async handleLogin(e) {
         e.preventDefault();
         
@@ -97,12 +137,79 @@ class LoginForm {
 
         } catch (err) {
             this.showError(err.message || 'Invalid credentials. Please try again.');
+=======
+    // --- MOCK AUTHENTICATION LOGIC ---
+    handleLogin(e) {
+        e.preventDefault(); 
+
+        const role = this.roleInput.value;
+        const username = this.usernameInput.value.trim();
+        const password = this.passwordInput.value;
+
+        // Fetch dynamic teachers added from the admin dashboard
+        const dynamicTeachers = JSON.parse(localStorage.getItem('facultyMembers')) || [];
+        
+        const validAdmins = ['admin'];
+        const validStudents = ['2026-001', '2026-002'];
+
+        if (this.loginAlert) {
+            this.loginAlert.classList.add('hidden-alert');
+        }
+
+        if (password !== 'admin123') {
+            this.showError('Invalid password. Please try again.');
+            return;
+        }
+
+        // --- NEW: Dynamic Teacher Verification & Session Tracking ---
+        if (role === 'teacher') {
+            let matchedTeacher = null;
+
+            // Check if it's the default teacher OR a newly added dynamic teacher
+            if (username === 't.janedoe') {
+                matchedTeacher = { username: 't.janedoe', fullname: 'Jane Doe', department: 'College of Computer Studies' };
+            } else {
+                matchedTeacher = dynamicTeachers.find(t => t.username === username);
+            }
+
+            if (matchedTeacher) {
+                // Save the session data so the dashboard knows who logged in!
+                localStorage.setItem('currentUser', JSON.stringify({
+                    role: 'teacher',
+                    username: matchedTeacher.username,
+                    fullname: matchedTeacher.fullname,
+                    department: matchedTeacher.department
+                }));
+                window.location.href = 'teacher-dashboard.html';
+            } else {
+                this.showError('Teacher account not found.');
+            }
+        } 
+        // ------------------------------------------------------------
+        else if (role === 'admin') {
+            if (validAdmins.includes(username)) {
+                window.location.href = 'admin-dashboard.html';
+            } else {
+                this.showError('Admin account not found.');
+            }
+        } 
+        else if (role === 'student') {
+            if (validStudents.includes(username)) {
+                window.location.href = 'student-dashboard.html';
+            } else {
+                this.showError('Student account not found.');
+            }
+>>>>>>> 64f0e7796444bfe0753bc248abfcd40b316a9bce
         }
     }
 
     showError(message) {
         if (this.loginAlert) {
             this.loginAlert.textContent = message;
+<<<<<<< HEAD
+=======
+            // Make the block viewable by stripping the hiding class away
+>>>>>>> 64f0e7796444bfe0753bc248abfcd40b316a9bce
             this.loginAlert.classList.remove('hidden-alert');
         }
     }

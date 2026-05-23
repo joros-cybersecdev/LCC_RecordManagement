@@ -330,23 +330,24 @@ class AdminDashboardController {
             } else {
                 students.forEach(student => {
                     tbody.innerHTML += `
-                        <tr>
-                            <td><span class="subject-code">${student.school_id}</span></td>
-                            <td>
-                                <a href="#" class="student-name-link" onclick="adminApp.openStudentProfile('${student.id}'); return false;">
-                                    ${student.full_name}
-                                </a>
-                            </td>
-                            <td>${student.program || '—'}</td>
-                            <td><span class="access-badge unlocked">Active</span></td>
-                            <td class="text-right">
-                                <div class="action-btns justify-end">
-                                    <button class="btn-action btn-grades" onclick="adminApp.openEditStudentModal('${student.id}')">Edit</button>
-                                    <button class="btn-delete" onclick="adminApp.deleteProfile('${student.id}')">Delete</button>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
+                    <tr>
+                        <td><span class="subject-code">${student.school_id}</span></td>
+                        <td>
+                            <a href="#" class="student-name-link" onclick="adminApp.openViewStudentModal('${student.id}'); return false;">
+                                ${student.full_name}
+                            </a>
+                        </td>
+                        <td>${student.program || '—'}</td>
+                        <td><span class="access-badge unlocked">Active</span></td>
+                        <td class="text-right">
+                            <div class="action-btns justify-end">
+                                <button class="action-btn-pill btn-view-row" onclick="adminApp.openViewStudentModal('${student.id}')">View</button>
+                                <button class="action-btn-pill btn-edit-row" onclick="adminApp.openEditStudentModal('${student.id}')">Edit</button>
+                                <button class="action-btn-pill btn-delete-row" onclick="adminApp.deleteProfile('${student.id}')">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
                 });
             }
         }
@@ -410,23 +411,20 @@ class AdminDashboardController {
                 : `<span style="font-size:0.78rem;color:var(--gray-400);">None assigned</span>`;
 
             tbody.innerHTML += `
-                <tr>
-                    <td><span class="subject-code">${teacher.school_id}</span></td>
-                    <td>${teacher.full_name}</td>
-                    <td>${teacher.email || teacher.school_id + '@lcc.edu'}</td>
-                    <td>${teacher.department || '—'}</td>
-                    <td>${countBadge}</td>
-                    <td class="text-right">
-                        <div class="action-btns justify-end">
-                            <button class="btn-action btn-grades"
-                                onclick="adminApp.openAssignTeacherModal('${teacher.id}', '${(teacher.full_name||'').replace(/'/g,"\\'")}', '${(teacher.department||'').replace(/'/g,"\\'")}')">
-                                Assign
-                            </button>
-                            <button class="btn-delete" onclick="adminApp.deleteProfile('${teacher.id}')">Delete</button>
-                        </div>
-                    </td>
-                </tr>
-            `;
+            <tr>
+                <td><span class="subject-code">${teacher.school_id}</span></td>
+                <td>${teacher.full_name}</td>
+                <td>${teacher.email || teacher.school_id + '@lcc.edu'}</td>
+                <td>${teacher.department || '—'}</td>
+                <td class="text-right">
+                    <div class="action-btns justify-end">
+                        <button class="action-btn-pill btn-view-row" onclick="adminApp.openViewTeacherModal('${teacher.id}')">View</button>
+                        <button class="action-btn-pill btn-edit-row" onclick="adminApp.openEditTeacherModal('${teacher.id}')">Edit</button>
+                        <button class="action-btn-pill btn-delete-row" onclick="adminApp.deleteProfile('${teacher.id}')">Delete</button>
+                    </div>
+                </td>
+            </tr>
+        `;
         });
     }
 
@@ -700,18 +698,20 @@ class AdminDashboardController {
 
         sections.forEach(sec => {
             tbody.innerHTML += `
-                <tr>
-                    <td><span class="subject-code">${sec.section_name}</span></td>
-                    <td>${sec.subjects?.title || '—'}</td>
-                    <td>${sec.school_year || '—'}</td>
-                    <td>${sec.semester || '—'}</td>
-                    <td class="text-right">
-                        <div class="action-btns justify-end">
-                            <button class="btn-delete" onclick="adminApp.deleteSection('${sec.id}')">Delete</button>
-                        </div>
-                    </td>
-                </tr>
-            `;
+            <tr>
+                <td><span class="subject-code">${sec.section_name}</span></td>
+                <td>${sec.subjects?.title || '—'}</td>
+                <td>${sec.school_year || '—'}</td>
+                <td>${sec.semester || '—'}</td>
+                <td class="text-right">
+                    <div class="action-btns justify-end">
+                        <button class="action-btn-pill btn-view-row" onclick="adminApp.openViewSectionModal('${sec.id}')">View</button>
+                        <button class="action-btn-pill btn-edit-row" onclick="adminApp.openEditSectionModal('${sec.id}')">Edit</button>
+                        <button class="action-btn-pill btn-delete-row" onclick="adminApp.deleteSection('${sec.id}')">Delete</button>
+                    </div>
+                </td>
+            </tr>
+        `;
         });
     }
 
@@ -745,9 +745,6 @@ class AdminDashboardController {
         this.openModal('editStudentModal');
     }
 
-    // ==========================================
-    // GRADES VIEW — Read-only monitor for admin
-    // ==========================================
 
     async initGradesView() {
         // Populate section dropdown and wire up change events
@@ -923,10 +920,8 @@ class AdminDashboardController {
             `;
         });
 
-        // Count badge
         if (countEl) countEl.textContent = `${records.length} student(s) · ${paidCount} paid`;
 
-        // GWA tfoot
         const gwa = gwaCount > 0 ? (gwaSum / gwaCount).toFixed(2) : 'N/A';
         if (tfoot) {
             tfoot.innerHTML = `
@@ -993,9 +988,7 @@ class AdminDashboardController {
         setTimeout(() => printWin.print(), 400);
     }
 
-    // ==========================================
-    // DELETION
-    // ==========================================
+   
 
     async deleteProfile(id) {
         if (!confirm('Delete this user? This removes their profile. To fully delete the login account, use the Supabase dashboard.')) return;
@@ -1027,9 +1020,7 @@ class AdminDashboardController {
         }
     }
 
-    // ==========================================
-    // UI / MODAL UTILITIES
-    // ==========================================
+   
 
     initEvents() {
         this.modalTriggers.forEach(btn => {
@@ -1038,6 +1029,45 @@ class AdminDashboardController {
                 const targetModal = btn.getAttribute('data-modal-target');
                 this.openModal(targetModal);
                 if (targetModal === 'addTeacherModal') this.populateTeacherSectionDropdown();
+
+
+class AdminDashboardController {
+    constructor() {
+        this.modals = document.querySelectorAll('.modal-overlay');
+        this.modalTriggers = document.querySelectorAll('.modal-trigger');
+        this.closeButtons = document.querySelectorAll('.modal-close-btn');
+        this.navTriggers = document.querySelectorAll('.nav-trigger');
+        
+        // Tracks active subjects/sections for modals
+        this.activeTeacherUsername = null;
+        this.activeStudentRow = null;
+
+        this.initEvents();
+        this.loadSavedTeachers();
+        this.loadSavedStudents();
+        this.loadSavedSections(); 
+        this.updateStats;
+
+        this.refreshStatCards();
+        this.loadRecentStudents();
+        
+    }
+
+    initEvents() {
+        // 1. Open Modals
+        this.modalTriggers.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = btn.getAttribute('data-modal-target');
+                
+                if (targetId === 'manageSubjectsModal') {
+                    this.prepareManageSubjectsModal(btn);
+                }
+                if (targetId === 'assignStudentSectionModal') {
+                    this.prepareAssignSectionModal(btn);
+                }
+                
+                this.openModal(targetId);
             });
         });
 
@@ -1151,6 +1181,268 @@ class AdminDashboardController {
     openStudentProfile(profileId) {
         this.openEditStudentModal(profileId);
     }
+
+    async openViewStudentModal(profileId) {
+        const { data: student, error } = await window.supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', profileId)
+            .single();
+
+        if (error || !student) return alert('Could not load student data.');
+
+        const setText = (id, val) => { 
+            const el = document.getElementById(id); 
+            if (el) el.textContent = val || '—'; 
+        };
+
+        setText('vs-id', student.school_id);
+        setText('vs-name', student.full_name);
+        setText('vs-program', student.program);
+        setText('vs-sex', student.sex);
+        setText('vs-birthday', student.birthday);
+        setText('vs-age', student.age);
+        setText('vs-address', student.address);
+        setText('vs-contact', student.contact);
+        setText('vs-email', student.email);
+        setText('vs-father-name', student.father_name);
+        setText('vs-father-contact', student.father_contact);
+        setText('vs-mother-name', student.mother_name);
+        setText('vs-mother-contact', student.mother_contact);
+
+        this.openModal('viewStudentModal');
+    }
+
+    async openViewTeacherModal(profileId) {
+        const { data: teacher, error } = await window.supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', profileId)
+            .single();
+
+        if (error || !teacher) return alert('Could not load teacher data.');
+
+        const setText = (id, val) => { 
+            const el = document.getElementById(id); 
+            if (el) el.textContent = val || '—'; 
+        };
+
+        setText('vt-id', teacher.school_id);
+        setText('vt-name', teacher.full_name);
+        setText('vt-dept', teacher.department);
+        setText('vt-email', teacher.email);
+        setText('vt-contact', teacher.contact);
+
+        const { data: sections } = await window.supabase
+            .from('sections')
+            .select('section_name, subjects(code, title)')
+            .eq('faculty_id', profileId);
+
+        const listContainer = document.getElementById('vt-sections-list');
+        if (listContainer) {
+            listContainer.innerHTML = '';
+            if (!sections || sections.length === 0) {
+                listContainer.innerHTML = '<p style="color:var(--gray-500);font-size:0.85rem;padding:0.5rem 0;">No sections currently assigned.</p>';
+            } else {
+                sections.forEach(sec => {
+                    const subjCode = sec.subjects?.code || 'No Subject';
+                    const subjTitle = sec.subjects?.title || '';
+                    listContainer.innerHTML += `
+                        <div class="profile-card-row" style="flex-direction:column; align-items:flex-start; gap:0.25rem;">
+                            <strong style="color:var(--gray-800); font-size:0.85rem;">${sec.section_name}</strong>
+                            <span style="color:var(--gray-500); font-size:0.75rem;">${subjCode} — ${subjTitle}</span>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        this.openModal('viewTeacherModal');
+    }
+
+    async openEditTeacherModal(profileId) {
+        const { data: teacher, error } = await window.supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', profileId)
+            .single();
+
+        if (error || !teacher) return alert('Could not load teacher data.');
+
+        document.getElementById('edit-teacher-id-hidden').value = teacher.id;
+        document.getElementById('edit-teacher-fullname').value = teacher.full_name || '';
+        document.getElementById('edit-teacher-dept').value = teacher.department || '';
+        document.getElementById('edit-teacher-email').value = teacher.email || '';
+        document.getElementById('edit-teacher-contact').value = teacher.contact || '';
+
+        this.openModal('editTeacherModal');
+    }
+
+    async handleUpdateTeacher() {
+        const btn = document.getElementById('btn-update-teacher-save');
+        const profileId = document.getElementById('edit-teacher-id-hidden').value;
+        const fullName = document.getElementById('edit-teacher-fullname').value.trim();
+
+        if (!fullName) return this.showModalError('editTeacherModal', 'Full Name is required.');
+
+        this.setButtonLoading(btn, true, 'Updating...');
+
+        try {
+            const { error } = await window.supabase.from('profiles').update({
+                full_name: fullName,
+                department: document.getElementById('edit-teacher-dept').value.trim(),
+                email: document.getElementById('edit-teacher-email').value.trim(),
+                contact: document.getElementById('edit-teacher-contact').value.trim()
+            }).eq('id', profileId);
+
+            if (error) throw error;
+
+            this.closeModalById('editTeacherModal');
+            this.showToast(`✅ Teacher "${fullName}" updated successfully!`);
+            this.loadTeachers();
+        } catch (err) {
+            this.showModalError('editTeacherModal', 'Error: ' + err.message);
+        } finally {
+            this.setButtonLoading(btn, false, 'Update Teacher');
+        }
+    }
+
+   
+    async openViewSectionModal(sectionId) {
+        const { data: section, error } = await window.supabase
+            .from('sections')
+            .select(`
+                *,
+                profiles ( full_name ),
+                subjects ( code, title )
+            `)
+            .eq('id', sectionId)
+            .single();
+
+        if (error || !section) return alert('Could not load section data.');
+
+        const { count } = await window.supabase
+            .from('records')
+            .select('*', { count: 'exact', head: true })
+            .eq('section_id', sectionId);
+
+        const setText = (id, val) => { 
+            const el = document.getElementById(id); 
+            if (el) el.textContent = val || '—'; 
+        };
+
+        setText('vsec-name', section.section_name);
+        setText('vsec-program', section.program);
+        setText('vsec-year', section.year_level);
+        setText('vsec-sem', section.semester);
+        setText('vsec-sy', section.school_year);
+        setText('vsec-teacher', section.profiles?.full_name || 'Unassigned');
+        setText('vsec-subject', section.subjects ? `${section.subjects.code} — ${section.subjects.title}` : 'Unassigned');
+        setText('vsec-count', count !== null ? count : '0');
+
+        this.openModal('viewSectionModal');
+    }
+
+    async populateFacultyDropdown(selectId) {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        select.innerHTML = '<option value="">— Select Teacher —</option>';
+        
+        const { data: teachers } = await window.supabase
+            .from('profiles')
+            .select('id, full_name')
+            .eq('role', 'faculty')
+            .order('full_name');
+            
+        if (teachers) {
+            teachers.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t.id;
+                opt.textContent = t.full_name;
+                select.appendChild(opt);
+            });
+        }
+    }
+
+    async populateSubjectDropdown(selectId) {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        select.innerHTML = '<option value="">— Select Subject —</option>';
+        
+        const { data: subjects } = await window.supabase
+            .from('subjects')
+            .select('id, code, title')
+            .order('code');
+            
+        if (subjects) {
+            subjects.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = `${s.code} — ${s.title}`;
+                select.appendChild(opt);
+            });
+        }
+    }
+
+    async openEditSectionModal(sectionId) {
+        const { data: section, error } = await window.supabase
+            .from('sections')
+            .select('*')
+            .eq('id', sectionId)
+            .single();
+
+        if (error || !section) return alert('Could not load section data.');
+
+        document.getElementById('edit-sec-id-hidden').value = section.id;
+        document.getElementById('edit-sec-name-val').value = section.section_name || '';
+        document.getElementById('edit-sec-program-val').value = section.program || '';
+        document.getElementById('edit-sec-year-val').value = section.year_level || '';
+        document.getElementById('edit-sec-sem-val').value = section.semester || '';
+
+        await Promise.all([
+            this.populateFacultyDropdown('edit-sec-faculty'),
+            this.populateSubjectDropdown('edit-sec-subject')
+        ]);
+
+        document.getElementById('edit-sec-faculty').value = section.faculty_id || '';
+        document.getElementById('edit-sec-subject').value = section.subject_id || '';
+
+        this.openModal('editSectionModal');
+    }
+
+    async handleUpdateSection() {
+        const btn = document.getElementById('btn-update-section-save');
+        const sectionId = document.getElementById('edit-sec-id-hidden').value;
+        const sectionName = document.getElementById('edit-sec-name-val').value.trim();
+
+        if (!sectionName) return this.showModalError('editSectionModal', 'Section Name is required.');
+
+        this.setButtonLoading(btn, true, 'Updating...');
+
+        try {
+            const facultyId = document.getElementById('edit-sec-faculty').value;
+            const subjectId = document.getElementById('edit-sec-subject').value;
+
+            const { error } = await window.supabase.from('sections').update({
+                section_name: sectionName,
+                program: document.getElementById('edit-sec-program-val').value,
+                year_level: document.getElementById('edit-sec-year-val').value,
+                semester: document.getElementById('edit-sec-sem-val').value,
+                faculty_id: facultyId ? facultyId : null,
+                subject_id: subjectId ? subjectId : null
+            }).eq('id', sectionId);
+
+            if (error) throw error;
+
+            this.closeModalById('editSectionModal');
+            this.showToast(`✅ Section "${sectionName}" updated successfully!`);
+            this.loadSections();
+        } catch (err) {
+            this.showModalError('editSectionModal', 'Error: ' + err.message);
+        } finally {
+            this.setButtonLoading(btn, false, 'Update Section');
+        }
+    }
 }
 
 let adminApp;
@@ -1159,34 +1451,3 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /*
-=============================================================
-  SETUP CHECKLIST — READ THIS
-=============================================================
-
-  STEP 1 — Paste your service_role key
-    In admin-dashboard.html, find:
-      const SUPABASE_SERVICE_KEY = 'YOUR_SERVICE_ROLE_KEY_HERE';
-    Replace with your key from:
-      Supabase Dashboard → Settings → API → service_role (secret)
-
-    This is what removes the email rate limit. The admin API
-    creates users instantly with no email sent at all.
-
-  STEP 2 — Disable RLS insert policy for profiles (or add one)
-    If you get "new row violates RLS" errors:
-      Supabase → Table Editor → profiles → RLS Policies
-      Add an INSERT policy: "allow authenticated" or disable RLS
-      while testing.
-
-  STEP 3 — profiles table columns required
-    id, school_id, full_name, role, program, sex,
-    birthday, age, address, contact, email,
-    father_name, father_contact, mother_name,
-    mother_contact, department, created_at
-
-  HOW LOGIN WORKS
-    Students:  ID = "2026-001"  → email: 2026-001@lcc.edu  password: 2026-001
-    Teachers:  Username = "t.doe" → email: t.doe@lcc.edu   password: t.doe
-    (Default password always equals the username/ID — tell users to change it)
-=============================================================
-*/

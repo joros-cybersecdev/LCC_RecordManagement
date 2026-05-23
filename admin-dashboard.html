@@ -244,18 +244,14 @@
                 </div>
             </div> 
 
-            <!-- ============================================================
-                 GRADES VIEW — Read-only. Admin monitors only.
-                 ============================================================ -->
+
             <div id="grades-view" class="view-section hidden">
 
-                <!-- Info notice -->
                 <div class="notice-bar notice-bar-info" style="display:flex;align-items:flex-start;gap:0.75rem;">
                     <span style="font-size:1.1rem;flex-shrink:0;">ℹ️</span>
                     <span>This is a <strong>read-only</strong> view. Grades are entered by faculty teachers. GWA is automatically computed from Final Ratings.</span>
                 </div>
 
-                <!-- Filter bar -->
                 <div class="filter-bar" id="grades-filter-bar">
                     <span class="filter-label">Student:</span>
                     <select class="filter-select" id="admin-grades-student-select">
@@ -289,7 +285,6 @@
                         </div>
                     </div>
 
-                    <!-- Grade Table -->
                     <div class="panel-body" style="padding:0;">
                         <div class="table-scroll-wrapper">
                             <table class="data-table" id="admin-grades-table">
@@ -759,7 +754,7 @@
     </div>
 </div>
 
-<div class="modal-overlay" id="manageSubjectsModal">
+<div class="modal-overlay" id="manageSubjectsModal" class="panel-toolbar filter-bar filter-bar-transparent" class="modal modal-lg">
     <div class="modal" style="max-width: 650px;"> 
         <div class="modal-header">
             <h3 class="modal-title">Assigned Subjects - Jane Doe</h3>
@@ -928,10 +923,212 @@
         </div>
     </div>
 </div>
+<div class="modal-overlay" id="viewStudentModal">
+    <div class="modal-box modal-lg view-modal-card">
+        <div class="view-modal-header admin-banner">
+            <button class="view-modal-close modal-close-btn">&times;</button>
+            <div class="view-modal-avatar">👤</div>
+            <h3 class="view-modal-name" id="vs-name">Student Name</h3>
+            <span class="view-modal-badge" id="vs-id">0000-000</span>
+        </div>
+        <div class="view-modal-body modal-scrollable">
+            <h4 class="modal-section-heading">Personal Details</h4>
+            <div class="profile-card-row">
+                <div class="pc-label"><span class="pc-label-emoji">📚</span>Program</div><div class="pc-value" id="vs-program"></div>
+            </div>
+            <div class="profile-card-row">
+                <div class="pc-label"><span class="pc-label-emoji">👤</span>Sex</div><div class="pc-value" id="vs-sex"></div>
+            </div>
+            <div class="profile-card-row">
+                <div class="pc-label"><span class="pc-label-emoji">🎂</span>Birthday</div><div class="pc-value" id="vs-birthday"></div>
+            </div>
+            <div class="profile-card-row">
+                <div class="pc-label"><span class="pc-label-emoji">⏱️</span>Age</div><div class="pc-value" id="vs-age"></div>
+            </div>
+            <div class="profile-card-row">
+                <div class="pc-label"><span class="pc-label-emoji">📞</span>Contact No.</div><div class="pc-value" id="vs-contact"></div>
+            </div>
+            <div class="profile-card-row">
+                <div class="pc-label"><span class="pc-label-emoji">✉️</span>Email Address</div><div class="pc-value" id="vs-email"></div>
+            </div>
+            <div class="profile-card-row full-width">
+                <div class="pc-label"><span class="pc-label-emoji">📍</span>Home Address</div><div class="pc-value left-align" id="vs-address"></div>
+            </div>
 
-<!-- ============================================================
-     ASSIGN TEACHER MODAL — Subject + Section Assignment
-     ============================================================ -->
+            <h4 class="modal-section-heading">Parents / Guardian</h4>
+            <div class="profile-card-row">
+                <div class="pc-label"><span class="pc-label-emoji">👨‍💼</span>Father's Name</div><div class="pc-value" id="vs-father-name"></div>
+            </div>
+            <div class="profile-card-row">
+                <div class="pc-label"><span class="pc-label-emoji">📱</span>Father's Contact</div><div class="pc-value" id="vs-father-contact"></div>
+            </div>
+            <div class="profile-card-row">
+                <div class="pc-label"><span class="pc-label-emoji">👩‍💼</span>Mother's Name</div><div class="pc-value" id="vs-mother-name"></div>
+            </div>
+            <div class="profile-card-row">
+                <div class="pc-label"><span class="pc-label-emoji">📱</span>Mother's Contact</div><div class="pc-value" id="vs-mother-contact"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="viewTeacherModal">
+    <div class="modal-box view-modal-card">
+        <div class="view-modal-header teacher-banner">
+            <button class="view-modal-close modal-close-btn">&times;</button>
+            <div class="view-modal-avatar">👩‍🏫</div>
+            <h3 class="view-modal-name" id="vt-name">Teacher Name</h3>
+            <span class="view-modal-badge" id="vt-id">Username</span>
+        </div>
+        <div class="view-modal-body modal-scrollable">
+            <h4 class="modal-section-heading">Faculty Details</h4>
+            <div class="profile-card-row">
+                <div class="pc-label"><span class="pc-label-emoji">🏢</span>Department</div><div class="pc-value" id="vt-dept"></div>
+            </div>
+            <div class="profile-card-row">
+                <div class="pc-label"><span class="pc-label-emoji">✉️</span>Email</div><div class="pc-value" id="vt-email"></div>
+            </div>
+            <div class="profile-card-row">
+                <div class="pc-label"><span class="pc-label-emoji">📞</span>Contact No.</div><div class="pc-value" id="vt-contact"></div>
+            </div>
+
+            <h4 class="modal-section-heading">Assigned Sections</h4>
+            <div id="vt-sections-list">
+                </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="editTeacherModal">
+    <div class="modal-box edit-modal-card">
+        <div class="edit-modal-header teacher-bg">
+            <h3 class="edit-modal-title">✏️ Edit Teacher Details</h3>
+            <button class="view-modal-close modal-close-btn" style="position:relative; top:0; right:0; width:28px; height:28px;">&times;</button>
+        </div>
+        <div class="edit-modal-body">
+            <input type="hidden" id="edit-teacher-id-hidden">
+            <div class="admin-form-group">
+                <label class="admin-label">Full Name *</label>
+                <input type="text" id="edit-teacher-fullname" class="admin-input" required>
+            </div>
+            <div class="admin-form-group">
+                <label class="admin-label">Department</label>
+                <input type="text" id="edit-teacher-dept" class="admin-input">
+            </div>
+            <div class="form-row">
+                <div class="admin-form-group">
+                    <label class="admin-label">Email Address</label>
+                    <input type="text" id="edit-teacher-email" class="admin-input">
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-label">Contact Number</label>
+                    <input type="text" id="edit-teacher-contact" class="admin-input">
+                </div>
+            </div>
+        </div>
+        <div class="edit-modal-footer">
+            <button class="btn-cancel modal-close-btn">Cancel</button>
+            <button class="btn-submit" id="btn-update-teacher-save" onclick="adminApp.handleUpdateTeacher()" style="background: linear-gradient(135deg, #4f46e5, #312e81);">Save Changes</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="viewSectionModal">
+    <div class="modal-box view-modal-card">
+        <div class="view-modal-header section-banner">
+            <button class="view-modal-close modal-close-btn">&times;</button>
+            <div class="view-modal-avatar">🏫</div>
+            <h3 class="view-modal-name" id="vsec-name">Section Name</h3>
+            <span class="view-modal-badge" id="vsec-sy">School Year</span>
+        </div>
+        <div class="view-modal-body">
+            <h4 class="modal-section-heading">Class Info</h4>
+            <div class="profile-card-row">
+                <div class="pc-label"><span class="pc-label-emoji">📚</span>Program</div><div class="pc-value" id="vsec-program"></div>
+            </div>
+            <div class="profile-card-row">
+                <div class="pc-label"><span class="pc-label-emoji">🎓</span>Year Level</div><div class="pc-value" id="vsec-year"></div>
+            </div>
+            <div class="profile-card-row">
+                <div class="pc-label"><span class="pc-label-emoji">🗓️</span>Semester</div><div class="pc-value" id="vsec-sem"></div>
+            </div>
+            <div class="profile-card-row" style="align-items: center; border-bottom: none; margin-bottom: 0.5rem;">
+                <div class="pc-label"><span class="pc-label-emoji">👥</span>Total Enrolled</div>
+                <div class="pc-value section-count-highlight" id="vsec-count"></div>
+            </div>
+
+            <h4 class="modal-section-heading">Assignments</h4>
+            <div class="profile-card-row full-width">
+                <div class="pc-label"><span class="pc-label-emoji">👩‍🏫</span>Assigned Teacher</div><div class="pc-value left-align" id="vsec-teacher"></div>
+            </div>
+            <div class="profile-card-row full-width">
+                <div class="pc-label"><span class="pc-label-emoji">📖</span>Assigned Subject</div><div class="pc-value left-align" id="vsec-subject"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="editSectionModal">
+    <div class="modal-box edit-modal-card">
+        <div class="edit-modal-header section-bg">
+            <h3 class="edit-modal-title">✏️ Edit Section</h3>
+            <button class="view-modal-close modal-close-btn" style="position:relative; top:0; right:0; width:28px; height:28px;">&times;</button>
+        </div>
+        <div class="edit-modal-body">
+            <input type="hidden" id="edit-sec-id-hidden">
+            <div class="form-row">
+                <div class="admin-form-group">
+                    <label class="admin-label">Section Name *</label>
+                    <input type="text" id="edit-sec-name-val" class="admin-input" required>
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-label">Program</label>
+                    <select id="edit-sec-program-val" class="admin-input">
+                        <option>BSIT</option>
+                        <option>BSCS</option>
+                        <option>BSIS</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="admin-form-group">
+                    <label class="admin-label">Year Level</label>
+                    <select id="edit-sec-year-val" class="admin-input">
+                        <option>1st Year</option>
+                        <option>2nd Year</option>
+                        <option>3rd Year</option>
+                        <option>4th Year</option>
+                    </select>
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-label">Semester</label>
+                    <select id="edit-sec-sem-val" class="admin-input">
+                        <option>1st Semester</option>
+                        <option>2nd Semester</option>
+                    </select>
+                </div>
+            </div>
+            
+            <h4 class="modal-section-heading" style="margin-top: 1rem;">Assignments</h4>
+            <div class="admin-form-group">
+                <label class="admin-label">Assign Faculty</label>
+                <select id="edit-sec-faculty" class="admin-input">
+                    </select>
+            </div>
+            <div class="admin-form-group">
+                <label class="admin-label">Assign Subject</label>
+                <select id="edit-sec-subject" class="admin-input">
+                    </select>
+            </div>
+        </div>
+        <div class="edit-modal-footer">
+            <button class="btn-cancel modal-close-btn">Cancel</button>
+            <button class="btn-submit" id="btn-update-section-save" onclick="adminApp.handleUpdateSection()" style="background: linear-gradient(135deg, #2563eb, #1d4ed8);">Save Changes</button>
+        </div>
+    </div>
+</div>
+
+
 <div class="modal-overlay" id="assignTeacherModal">
     <div class="modal modal-lg">
         <div class="modal-header">
@@ -940,7 +1137,6 @@
         </div>
         <div class="modal-body">
 
-            <!-- Teacher identity (read-only banner) -->
             <div id="assign-teacher-banner" style="display:flex;align-items:center;gap:0.9rem;background:linear-gradient(135deg,#0f766e,#134e4a);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.25rem;">
                 <div id="assign-teacher-avatar" style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:800;color:#fff;flex-shrink:0;">T</div>
                 <div>
@@ -978,6 +1174,7 @@
         </div>
     </div>
 </div>
+
 
 <script src="js/dashboard.js"></script>
 <script src="js/admin-dashboard.js"></script>
