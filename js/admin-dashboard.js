@@ -644,6 +644,14 @@ class AdminDashboardController {
 
             if (error) throw error;
 
+            // ---> CRITICAL FIX: Ensure sections table knows who the faculty is <---
+            const { error: secError } = await window.supabase
+                .from('sections')
+                .update({ faculty_id: teacherId })
+                .eq('id', sectionId);
+                
+            if (secError) throw secError;
+
             // Reset dropdowns and refresh list
             document.getElementById('assign-subject-select').value = '';
             document.getElementById('assign-section-select').value = '';
@@ -750,27 +758,41 @@ class AdminDashboardController {
     // ==========================================
 
     async initGradesView() {
-        // Populate section dropdown and wire up change events
-        await this.populateGradesSectionDropdown();
+        // (NOTE: In HTML, the ID is #admin-grades-student-select. We are treating it as a section selector.)
+        const secSelect = document.getElementById('admin-grades-student-select');
+        // Rename the ID dynamically to match what it actually represents
+        if (secSelect) secSelect.id = 'admin-grades-section-select';
+        const updatedSelect = document.getElementById('admin-grades-section-select');
+        
+        if (!updatedSelect) return;
 
-        const secSelect = document.getElementById('admin-grades-section-select');
-        const subSelect = document.getElementById('admin-grades-subject-select');
+        // Fetch sections + subjects dynamically
+        const { data: sections, error } = await window.supabase
+            .from('sections')
+            .select('id, section_name, semester, school_year, subjects(code, title)')
+            .order('section_name');
 
-        if (secSelect) {
-            secSelect.addEventListener('change', async () => {
-                const sectionId = secSelect.value;
-                subSelect.innerHTML = '<option value="">— All Subjects —</option>';
-                if (!sectionId) return;
-                await this.populateGradesSubjectDropdown(sectionId);
-                this.loadGrades(sectionId, subSelect.value);
-            });
-        }
+        if (error || !sections) return;
 
-        if (subSelect) {
-            subSelect.addEventListener('change', () => {
-                const sectionId = secSelect ? secSelect.value : '';
-                if (sectionId) this.loadGrades(sectionId, subSelect.value);
-            });
+        updatedSelect.innerHTML = '<option value="" disabled selected>— Select a Section —</option>';
+        
+        sections.forEach(sec => {
+            const subjTitle = sec.subjects ? sec.subjects.title : 'Unassigned Subject';
+            const subjCode = sec.subjects ? sec.subjects.code : '';
+            const opt = document.createElement('option');
+            opt.value = sec.id;
+            opt.textContent = `${sec.section_name} — ${subjCode} ${subjTitle}`;
+            updatedSelect.appendChild(opt);
+        });
+
+        updatedSelect.addEventListener('change', () => {
+            this.loadGrades(updatedSelect.value);
+        });
+
+        // Auto-load first section
+        if (sections.length > 0) {
+            updatedSelect.value = sections[0].id;
+            this.loadGrades(sections[0].id);
         }
     }
 
@@ -811,30 +833,36 @@ class AdminDashboardController {
         }
     }
 
-    async loadGrades(sectionId, subjectId = '') {
+    async loadGrades(sectionId) {
         const tbody = document.getElementById('admin-grades-tbody');
         const tfoot = document.getElementById('admin-grades-tfoot');
-        const countEl = document.getElementById('admin-grades-count');
-        const panelTitle = document.getElementById('admin-grades-panel-title');
-        const panelSub = document.getElementById('admin-grades-panel-sub');
-
         if (!tbody) return;
 
         // Show loading state
         tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--gray-400);padding:2rem;">Loading grades…</td></tr>`;
 
-        // Fetch section info for panel header
+        // Fetch section info to properly update the student info card header
         const { data: secInfo } = await window.supabase
             .from('sections')
             .select('section_name, semester, school_year, subjects(code, title)')
             .eq('id', sectionId)
             .single();
 
-        if (panelTitle && secInfo) {
-            panelTitle.textContent = `${secInfo.subjects?.code || ''} — ${secInfo.subjects?.title || secInfo.section_name}`;
-        }
-        if (panelSub && secInfo) {
-            panelSub.textContent = `${secInfo.section_name} • ${secInfo.school_year || ''} • ${secInfo.semester || ''}`;
+        if (secInfo) {
+            // Target the elements directly inside the hardcoded info banner via hierarchy
+            const gradesView = document.getElementById('grades-view');
+            if (gradesView) {
+                const headerBox = gradesView.querySelector('.panel > div:first-child');
+                const titleEl = headerBox?.querySelector('div:first-child > div:nth-child(2) > div:first-child');
+                const subTitleEl = headerBox?.querySelector('div:first-child > div:nth-child(2) > div:nth-child(2)');
+                const semBadgeEl = headerBox?.querySelector('div:nth-child(2) > span:first-child');
+                const avatarEl = headerBox?.querySelector('div:first-child > div:first-child');
+
+                if (titleEl) titleEl.textContent = `${secInfo.subjects?.code || ''} — ${secInfo.subjects?.title || 'Unassigned Subject'}`;
+                if (subTitleEl) subTitleEl.innerHTML = `${secInfo.section_name} &nbsp;•&nbsp; ${secInfo.school_year || 'N/A'}`;
+                if (semBadgeEl) semBadgeEl.textContent = secInfo.semester || 'N/A';
+                if (avatarEl) avatarEl.textContent = secInfo.section_name.charAt(0);
+            }
         }
 
         // Fetch records with student profiles
@@ -844,7 +872,8 @@ class AdminDashboardController {
                 id, prelim, midterm, final, final_rating, status, payment_status,
                 profiles ( full_name, school_id )
             `)
-            .eq('section_id', sectionId);
+            .eq('section_id', sectionId)
+            .order('profiles(full_name)');
 
         const { data: records, error } = await query;
         if (error) {
@@ -852,7 +881,8 @@ class AdminDashboardController {
             return;
         }
 
-        this.renderGradesTable(records || [], countEl, tfoot);
+        // Use the existing renderer, passing a null countEl because it was removed from the header 
+        this.renderGradesTable(records || [], null, tfoot);
     }
 
     renderGradesTable(records, countEl, tfoot) {
